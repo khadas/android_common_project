@@ -109,6 +109,35 @@ function build_anning() {
 	cd ${MAIN_FOLDER}
 	./project/build/build_kernel_4.9.sh
 }
+
+function copy_out() {
+	SRC_PATH=$1
+	cd ${MAIN_FOLDER}/../
+	if [ ${ANDROID_OUT_DIR} -a -d ${ANDROID_OUT_DIR} ]; then
+		echo "copy kernel to incoming android out dir"
+		mkdir -p ${ANDROID_OUT_DIR}
+		rm -rf ${ANDROID_OUT_DIR}/*
+		cp -a ${SRC_PATH}/* ${ANDROID_OUT_DIR}/
+	else
+		if [ "$2" = "adt4" ]; then
+			ANDROID_PROJECT_PATH=device/sei/adt4-kernel
+		else
+			ANDROID_PROJECT_PATH=device/amlogic/$2-kernel
+		fi
+		if [ $KERNEL_A32_SUPPORT ]; then
+			DST_PATH=${MAIN_FOLDER}/../${ANDROID_PROJECT_PATH}/32/${KERNEL_VERSION}
+		else
+			DST_PATH=${MAIN_FOLDER}/../${ANDROID_PROJECT_PATH}/${KERNEL_VERSION}
+		fi
+		if [ -d ${MAIN_FOLDER}/../${ANDROID_PROJECT_PATH}/${KERNEL_VERSION} ]; then
+			echo "copy kernel to default android out dir"
+			mkdir -p ${DST_PATH}
+			rm -rf ${DST_PATH}/*
+			cp -a ${SRC_PATH}/* ${DST_PATH}/
+		fi
+	fi
+}
+
 function build_common_4.9() {
 	if [ $KERNEL_A32_SUPPORT ]; then
 		echo "------project/${device_project}/$1/build.config.meson.arm.trunk_4.9-----"
@@ -315,6 +344,8 @@ function build_common_5.15() {
 	fi
 
 	./project/build/build_kernel_5.15.sh $sub_parameters
+
+	copy_out ${KERNEL_DIR}/${KERNEL_REPO}/out/android/${BOARD_DEVICENAME} ${BOARD_DEVICENAME}
 }
 
 function build_common() {
@@ -610,6 +641,9 @@ function bin_path_parser() {
 				continue ;;
 			--recovery_ramdisk)
 				CONFIG_RECOVERY_Ramdisk="${argv[$i]}"
+				continue ;;
+			-o)
+				ANDROID_OUT_DIR="${argv[$i]}"
 				continue ;;
 			--1g)
 				export CONFIG_KERNEL_DDR_1G=true
