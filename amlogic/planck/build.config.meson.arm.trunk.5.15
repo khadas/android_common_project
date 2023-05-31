@@ -10,6 +10,7 @@ EXT_MODULES_ANDROID="
 	driver_modules/gpu/bifrost
 	driver_modules/media_modules
 	driver_modules/wifi_bt/bt
+	driver_modules/wifi_bt/wifi
 "
 
 VENDOR_MODULES_LOAD_BLACK_LIST="
