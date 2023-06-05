@@ -21,6 +21,7 @@ CONFIG_BLUETOOTH_MODULES ?= multibt
 ########################################################################
 CONFIG_WIFI_MODULES := qca6174 rtl8852bs
 
+CONFIG_WIFI_MODULES := multiwifi
 ########################################################################
 #
 #                      CONFIG_BCMDHD_CUSB
