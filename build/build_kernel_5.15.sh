@@ -7,11 +7,7 @@ echo
 echo "========================================================"
 echo "enter kernel build: $@"
 pushd ${KERNEL_REPO}
-if [ $KERNEL_A32_SUPPORT ]; then
-	./mk.sh --arch arm --android_project ${BOARD_DEVICENAME} $@
-else
-	./mk.sh --android_project ${BOARD_DEVICENAME} $@
-fi
+./mk.sh $@
 popd
 
 [[ "$@" =~ "--patch" ]] && echo "Finish patch" &&  exit

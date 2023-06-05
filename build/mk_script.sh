@@ -309,6 +309,20 @@ function build_common_5.15() {
 		SKIP_MRPROPER=1
 	fi
 	cd ${MAIN_FOLDER}
+	if [[ -n ${CONFIG_UPGRADE} ]]; then
+		ANDROID_VERSION=${CONFIG_UPGRADE}
+	else
+		local android_version='o'
+		local android_version_number=8
+		local k_android_version=$(grep BRANCH= ${KERNEL_REPO}/${KERNEL_DIR}/build.config.constants)
+		k_android_version=${k_android_version#*android}
+		k_android_version=${k_android_version%%-*}
+		local version_diff=$((${k_android_version} - ${android_version_number}))
+		android_version=$(printf "%d" "'${android_version}")
+		android_version=$((${android_version} + ${version_diff}))
+		ANDROID_VERSION=$(echo ${android_version} | awk '{printf("%c", $1)}')
+	fi
+	export ANDROID_VERSION
 	if [ $KERNEL_A32_SUPPORT ]; then
 		BUILD_CONFIG_ANDROID=${PRODUCT_DIRNAME}/build.config.meson.arm.trunk.5.15
 	else
@@ -345,6 +359,11 @@ function build_common_5.15() {
 		build_config_to_bzl
 		build_config_to_build_config
 	fi
+
+	[[ "${KERNEL_A32_SUPPORT}" == "true" ]] && sub_parameters="$sub_parameters --arch arm"
+	[[ -n ${CONFIG_UPGRADE} ]] && sub_parameters="$sub_parameters --upgrade ${ANDROID_VERSION}"
+	sub_parameters="$sub_parameters --android_project ${BOARD_DEVICENAME}"
+	echo sub_parameters=$sub_parameters
 
 	./project/build/build_kernel_5.15.sh $sub_parameters
 
@@ -628,13 +647,16 @@ function bin_path_parser() {
 				export CONFIG_REPLACE_GKI_IMAGE=true
 				continue ;;
 			--upgrade)
-				CONFIG_UPGRADE=true
+				CONFIG_UPGRADE="${argv[$i]}"
 				continue ;;
 			--modules)
 				CONFIG_ONE_MODULES="${argv[$i]}"
 				continue ;;
 			--kernel_only)
 				CONFIG_KERNEL_ONLY=true
+				continue ;;
+			--kernel32)
+				export KERNEL_A32_SUPPORT=true
 				continue ;;
 			--ramdisk)
 				CONFIG_Ramdisk="${argv[$i]}"
