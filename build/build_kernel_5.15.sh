@@ -42,7 +42,7 @@ mkdir -p ${DEVICE_KERNEL_DIR}/lib/modules/
 if [[ -d ${COMMON_OUT_DIR}/vendor_lib ]]; then
 	cp -a ${COMMON_OUT_DIR}/vendor_lib/* ${DEVICE_KERNEL_DIR}/lib/
 fi
-if [[ "$@" =~ "--bazel" ]]; then
+if [[ "${BAZEL}" == "1" ]]; then
 	cp -a ${OUT_AMLOGIC_DIR}/ext_modules/*.ko ${DEVICE_KERNEL_DIR}/lib/modules/
 
 	for src_dst in ${FILES_COPY}; do
