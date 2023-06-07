@@ -645,7 +645,7 @@ function bin_path_parser() {
 				CONFIG_NONGKI=true
 				continue ;;
 			--gki_image)
-				export CONFIG_REPLACE_GKI_IMAGE=true
+				# export CONFIG_REPLACE_GKI_IMAGE=true
 				continue ;;
 			--upgrade)
 				CONFIG_UPGRADE="${argv[$i]}"
