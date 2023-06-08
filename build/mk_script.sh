@@ -129,10 +129,10 @@ function copy_out() {
 		else
 			DST_PATH=${MAIN_FOLDER}/../${ANDROID_PROJECT_PATH}/${KERNEL_VERSION}
 		fi
-		if [ -d ${MAIN_FOLDER}/../${ANDROID_PROJECT_PATH}/${KERNEL_VERSION} ]; then
+		if [ -d ${MAIN_FOLDER}/../${ANDROID_PROJECT_PATH} ]; then
+			mkdir -p ${DST_PATH}
 			DST_PATH=`realpath ${DST_PATH}`
 			echo "copy kernel to ${DST_PATH}"
-			mkdir -p ${DST_PATH}
 			rm -rf ${DST_PATH}/*
 			cp -a ${SRC_PATH}/* ${DST_PATH}/
 		fi
