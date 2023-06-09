@@ -46,9 +46,8 @@ CONFIG_BLUETOOTH_MODULES ?= multibt
 CONFIG_WIFI_MODULES ?= qca6174 rtl8822cu ap6398s
 
 #If environment variable 'MULTI_WIFI' is not set to 'false',then ignore the above 'CONFIG_WIFI_MODULES' and compile all currently supported WiFi
-ifneq ($(MULTI_WIFI),false)
-CONFIG_WIFI_MODULES := multiwifi
-endif
+
+#CONFIG_WIFI_MODULES := multiwifi
 
 
 ########################################################################
