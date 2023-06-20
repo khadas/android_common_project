@@ -112,10 +112,8 @@ function build_anning() {
 
 function copy_out() {
 	SRC_PATH=$1
-	cd ${MAIN_FOLDER}/../
 	if [ ${ANDROID_OUT_DIR} -a -d ${ANDROID_OUT_DIR} ]; then
 		echo "copy kernel to incoming android out dir"
-		mkdir -p ${ANDROID_OUT_DIR}
 		rm -rf ${ANDROID_OUT_DIR}/*
 		cp -a ${SRC_PATH}/* ${ANDROID_OUT_DIR}/
 	else
@@ -125,15 +123,25 @@ function copy_out() {
 			ANDROID_PROJECT_PATH=device/amlogic/$2-kernel
 		fi
 		if [ $KERNEL_A32_SUPPORT ]; then
-			DST_PATH=${MAIN_FOLDER}/../${ANDROID_PROJECT_PATH}/32/${KERNEL_VERSION}
+			if [[ -d ${MAIN_FOLDER}/../${ANDROID_PROJECT_PATH} ]]; then
+				DST_PATH=${MAIN_FOLDER}/../${ANDROID_PROJECT_PATH}/32/${KERNEL_VERSION}
+			elif [[ -d ${MAIN_FOLDER}/${ANDROID_PROJECT_PATH} ]]; then
+				DST_PATH=${MAIN_FOLDER}/${ANDROID_PROJECT_PATH}/32/${KERNEL_VERSION}
+			fi
 		else
-			DST_PATH=${MAIN_FOLDER}/../${ANDROID_PROJECT_PATH}/${KERNEL_VERSION}
+			if [[ -d ${MAIN_FOLDER}/../${ANDROID_PROJECT_PATH} ]]; then
+				DST_PATH=${MAIN_FOLDER}/../${ANDROID_PROJECT_PATH}/${KERNEL_VERSION}
+			elif [[ -d ${MAIN_FOLDER}/${ANDROID_PROJECT_PATH} ]]; then
+				DST_PATH=${MAIN_FOLDER}/${ANDROID_PROJECT_PATH}/${KERNEL_VERSION}
+			fi
+
 		fi
-		if [ -d ${MAIN_FOLDER}/../${ANDROID_PROJECT_PATH} ]; then
+		if [[ -d ${MAIN_FOLDER}/../${ANDROID_PROJECT_PATH} || -d ${MAIN_FOLDER}/${ANDROID_PROJECT_PATH} ]]; then
 			mkdir -p ${DST_PATH}
 			DST_PATH=`realpath ${DST_PATH}`
 			echo "copy kernel to ${DST_PATH}"
 			rm -rf ${DST_PATH}/*
+			pwd
 			cp -a ${SRC_PATH}/* ${DST_PATH}/
 		fi
 	fi
@@ -369,7 +377,7 @@ function build_common_5.15() {
 
 	./project/build/build_kernel_5.15.sh $sub_parameters
 
-	copy_out ${KERNEL_DIR}/${KERNEL_REPO}/out/android/${BOARD_DEVICENAME} ${BOARD_DEVICENAME}
+	copy_out ${KERNEL_REPO}/out/android/${BOARD_DEVICENAME} ${BOARD_DEVICENAME}
 }
 
 function build_common() {
@@ -671,6 +679,8 @@ function bin_path_parser() {
 				continue ;;
 			-o)
 				ANDROID_OUT_DIR="${argv[$i]}"
+				mkdir -p ${ANDROID_OUT_DIR}
+				ANDROID_OUT_DIR=$(realpath ${ANDROID_OUT_DIR})
 				continue ;;
 			--1g)
 				export CONFIG_KERNEL_DDR_1G=true
@@ -699,4 +709,6 @@ function main() {
 	build $@
 }
 
+set -e
 main $@ # parse all paras to function
+set +e
