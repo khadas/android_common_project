@@ -292,7 +292,11 @@ function build_config_to_build_config() {
 	echo 						>> ${PROJECT_DIR}/build.config.project
 
 	export WIFI_TRUNK_CONFIG=${MAIN_FOLDER}/${PRODUCT_DIRNAME}/wifibt.build.config.trunk.mk
-	make -f ${MAIN_FOLDER}/driver_modules/wifi_bt/wifi/configs/get_module.mk TOP_DIR=$MAIN_FOLDER BOARD=$BOARD_DEVICENAME
+	if [ -d "${MAIN_FOLDER}/common14-5.15/driver_modules/wifi_bt/wifi" ]; then
+		make -f ${MAIN_FOLDER}/common14-5.15/driver_modules/wifi_bt/wifi/configs/get_module.mk TOP_DIR=$MAIN_FOLDER BOARD=$BOARD_DEVICENAME DRIVER_IN_KERNEL=true
+	else
+		make -f ${MAIN_FOLDER}/driver_modules/wifi_bt/wifi/configs/get_module.mk TOP_DIR=$MAIN_FOLDER BOARD=$BOARD_DEVICENAME
+	fi
 	echo "WIFI_TRUNK_CONFIG=${WIFI_TRUNK_CONFIG}"	>> ${PROJECT_DIR}/build.config.project
 	echo "PRODUCT_DIR=${BOARD_DEVICENAME}" 		>> ${PROJECT_DIR}/build.config.project
 	[[ -n ${GPU_DRV_VERSION} ]] && echo "GPU_DRV_VERSION=${GPU_DRV_VERSION}" >> ${PROJECT_DIR}/build.config.project
