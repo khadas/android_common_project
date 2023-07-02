@@ -25,7 +25,7 @@ source ${KERNEL_BUILD_VAR_FILE}
 DEVICE_KERNEL_DIR=${KERNEL_REPO}/out/android/${BOARD_DEVICENAME}
 
 echo "copy symbols"
-rm -rf ${DEVICE_KERNEL_DIR} 
+rm -rf ${DEVICE_KERNEL_DIR}
 mkdir -p ${DEVICE_KERNEL_DIR}
 cp -rf ${OUT_AMLOGIC_DIR}/symbols ${DEVICE_KERNEL_DIR}/symbols
 
@@ -72,42 +72,66 @@ if [[ -n ${LOAD_EXT_MODULES_IN_SECOND_STAGE} ]]; then
 	cat ${OUT_AMLOGIC_DIR}/ext_modules/ext_modules.order >> ${DEVICE_KERNEL_DIR}/vendor_dlkm.modules.load
 fi
 
-echo "copy gki image"
-if [[ ${FULL_KERNEL_VERSION} != "common13-5.15" && "${KERNEL_A32_SUPPORT}" != "true" && -z ${EXT_MODULES} ]]; then
-	DIST_GKI_DIR=${DIST_GKI_DIR:-${DIST_DIR}}
-	touch ${DEVICE_KERNEL_DIR}/system_dlkm.modules.load
-        cat ${DEVICE_KERNEL_DIR}/vendor_dlkm.modules.load | while read gki_module; do
-		awk "/\/${gki_module}/" ${DIST_GKI_DIR}/system_dlkm.modules.load >> ${DEVICE_KERNEL_DIR}/system_dlkm.modules.load
-	done
-	cat ${DEVICE_KERNEL_DIR}/system_dlkm.modules.load  | while read gki_module; do
-		gki_module=${gki_module##*/}
-		sed -i "/^${gki_module}/d" ${DEVICE_KERNEL_DIR}/vendor_dlkm.modules.load
-		rm ${DEVICE_KERNEL_DIR}/lib/modules/${gki_module}
-	done
-	mkdir ${DEVICE_KERNEL_DIR}/gki
+if [[ ${FULL_KERNEL_VERSION} == "common13-5.15" ]]; then
 	if [[ ${CONFIG_REPLACE_GKI_IMAGE} ]]; then
+		echo "copy gki image"
 		gki_dir=${KERNEL_REPO}/gki_image
+		cp ${gki_dir}/Image* ${DEVICE_KERNEL_DIR}
+		cp ${gki_dir}/vmlinux ${DEVICE_KERNEL_DIR}/symbols
+		while read gki_module; do
+			gki_module=${gki_module##*/}
+			gki_module_dst=`find ${DEVICE_KERNEL_DIR}/ -name ${gki_module} -not -path "${DEVICE_KERNEL_DIR}/symbols/*"`
+			cp ${gki_dir}/${gki_module} ${gki_module_dst}
+		done < ${KERNEL_REPO}/${KERNEL_DIR}/android/gki_system_dlkm_modules
 	else
-		gki_dir=${DIST_GKI_DIR}
+		echo "copy image"
+		if [ ${KERNEL_A32_SUPPORT} ]; then
+			cp ${DIST_DIR}/uImage ${DEVICE_KERNEL_DIR}/
+		else
+			cp ${DIST_DIR}/Image* ${DEVICE_KERNEL_DIR}/
+		fi
 	fi
-	cp ${gki_dir}/Image* ${DEVICE_KERNEL_DIR}/gki
-	cp ${gki_dir}/boot* ${DEVICE_KERNEL_DIR}/gki
-	cp ${gki_dir}/system_dlkm* ${DEVICE_KERNEL_DIR}/gki
-	cp ${gki_dir}/vmlinux ${DEVICE_KERNEL_DIR}/gki
-
-	if [ -f ${DEVICE_KERNEL_DIR}/gki/system_dlkm_staging_archive.tar.gz ]; then
-		(cd ${DEVICE_KERNEL_DIR}/gki; tar -zxf system_dlkm_staging_archive.tar.gz)
-		for module in `find ${DEVICE_KERNEL_DIR}/gki -name *.ko`; do
-			module_name=${module##*/}
-			find_module=
-			for white_module in ${GKI_MODULES_LOAD_WHITE_LIST}; do
-				if [[ "${module_name}" == "${white_module}" ]]; then
-					find_module=1
-					break;
-				fi
-			done
-			[[ -z ${find_module} ]] && rm -f ${module}
+else
+	if [ ${KERNEL_A32_SUPPORT} ]; then
+		cp ${DIST_DIR}/uImage ${DEVICE_KERNEL_DIR}/
+	elif [[ -n ${EXT_MODULES} && "${BAZEL}" != "1" ]]; then
+		cp ${DIST_DIR}/Image* ${DEVICE_KERNEL_DIR}/
+	else
+		DIST_GKI_DIR=${DIST_GKI_DIR:-${DIST_DIR}}
+		touch ${DEVICE_KERNEL_DIR}/system_dlkm.modules.load
+        	cat ${DEVICE_KERNEL_DIR}/vendor_dlkm.modules.load | while read gki_module; do
+			awk "/\/${gki_module}/" ${DIST_GKI_DIR}/system_dlkm.modules.load >> ${DEVICE_KERNEL_DIR}/system_dlkm.modules.load
 		done
+		cat ${DEVICE_KERNEL_DIR}/system_dlkm.modules.load  | while read gki_module; do
+			gki_module=${gki_module##*/}
+			sed -i "/^${gki_module}/d" ${DEVICE_KERNEL_DIR}/vendor_dlkm.modules.load
+			rm ${DEVICE_KERNEL_DIR}/lib/modules/${gki_module}
+		done
+		mkdir ${DEVICE_KERNEL_DIR}/gki
+		if [[ ${CONFIG_REPLACE_GKI_IMAGE} ]]; then
+			gki_dir=${KERNEL_REPO}/gki_image
+		else
+			gki_dir=${DIST_GKI_DIR}
+		fi
+		cp ${gki_dir}/Image* ${DEVICE_KERNEL_DIR}/gki
+		cp ${gki_dir}/boot* ${DEVICE_KERNEL_DIR}/gki
+		cp ${gki_dir}/system_dlkm* ${DEVICE_KERNEL_DIR}/gki
+		cp ${gki_dir}/vmlinux ${DEVICE_KERNEL_DIR}/gki
+
+		if [ -f ${DEVICE_KERNEL_DIR}/gki/system_dlkm_staging_archive.tar.gz ]; then
+			(cd ${DEVICE_KERNEL_DIR}/gki; tar -zxf system_dlkm_staging_archive.tar.gz)
+			for module in `find ${DEVICE_KERNEL_DIR}/gki -name *.ko`; do
+				module_name=${module##*/}
+				find_module=
+				for white_module in ${GKI_MODULES_LOAD_WHITE_LIST}; do
+					if [[ "${module_name}" == "${white_module}" ]]; then
+						find_module=1
+						break;
+					fi
+				done
+				[[ -z ${find_module} ]] && rm -f ${module}
+			done
+		fi
 	fi
 fi
 
@@ -145,17 +169,6 @@ if [[ ${dtb_files_count} == 1 ]]; then
 	fi
 else
 	${DTBTOOL_DIR}/dtbTool -o ${DEVICE_KERNEL_DIR}/${BOARD_DEVICENAME}.dtb -p ${DTBTOOL_DIR}/ ${OUT_AMLOGIC_DIR}/dtb/
-fi
-
-echo "copy Image*"
-if [ $KERNEL_A32_SUPPORT ]; then
-	cp ${DIST_DIR}/uImage ${DEVICE_KERNEL_DIR}/
-else
-	if [[ ${FULL_KERNEL_VERSION} != "common13-5.15" ]]; then
-		cp ${DIST_GKI_DIR}/Image* ${DEVICE_KERNEL_DIR}/
-	else
-		cp ${DIST_DIR}/Image.gz ${DEVICE_KERNEL_DIR}/
-	fi
 fi
 
 rm -f ${KERNEL_BUILD_VAR_FILE}

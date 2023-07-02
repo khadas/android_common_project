@@ -310,8 +310,19 @@ function build_common_5.15() {
 		export KERNEL_REPO=common-${CONFIG_KERNEL_VERSION}
 		export FULL_KERNEL_VERSION="common13-5.15"
 	else
+		if [ ${CONFIG_KERNEL_VERSION} == "common13-5.15" ]; then
+			if [[ -d ${CONFIG_KERNEL_VERSION} ]]; then
+				export KERNEL_REPO=${CONFIG_KERNEL_VERSION}
+			elif [[ -d common-5.15 ]]; then
+				export KERNEL_REPO="common-5.15"
+			else
+				echo "error -v ${CONFIG_KERNEL_VERSION}"
+				exit
+			fi
+		else
+			export KERNEL_REPO=${CONFIG_KERNEL_VERSION}
+		fi
 		export FULL_KERNEL_VERSION=${CONFIG_KERNEL_VERSION}
-		export KERNEL_REPO=${CONFIG_KERNEL_VERSION}
 	fi
 	export KERNEL_DIR=common
 	export COMMON_DRIVERS_DIR=common_drivers
@@ -364,7 +375,7 @@ function build_common_5.15() {
 		export CONFIG_KERNEL_FCC_PIP=true
 	fi
 
-	if [[ "${FULL_KERNEL_VERSION}" != "common13-5.15" ]]; then
+	if [[ "${FULL_KERNEL_VERSION}" != "common13-5.15" && "${KERNEL_A32_SUPPORT}" != "true" ]]; then
 		local common_drivers=${KERNEL_REPO}/common/common_drivers
 		PROJECT_DIR=${common_drivers}/project
 		[[ ! -d ${common_drivers} ]] && echo "no common_drivers: ${common_drivers}" && exit
@@ -404,6 +415,7 @@ function build() {
 	unset SKIP_CP_KERNEL_HDR
 	unset BUILD_KERNEL_ONLY
 	unset SKIP_EXT_MODULES
+	export PRODUCT_DIR=$1
 
 	if [ "${CONFIG_KERNEL_VERSION}" == "" ]; then
 		if [ "$1" = "franklin" -o "$1" = "ohm" -o "$1" = "elektra" -o "$1" = "newton" ]; then
