@@ -390,6 +390,7 @@ function build_common_5.15() {
 			fi
 		done
 	fi
+	[[ "${KASAN_ENABLED}" == "true" ]] && sub_parameters="$sub_parameters --kasan"
 	sub_parameters="$sub_parameters --android_project ${BOARD_DEVICENAME}"
 	echo sub_parameters=$sub_parameters
 
@@ -672,8 +673,11 @@ function bin_path_parser() {
 			--nonGKI)
 				CONFIG_NONGKI=true
 				continue ;;
+			--kasan)
+				KASAN_ENABLED=true
+				continue ;;
 			--gki_image)
-				export CONFIG_REPLACE_GKI_IMAGE=true
+				[[ ${KASAN_ENABLED} != "true" ]] && export CONFIG_REPLACE_GKI_IMAGE=true
 				continue ;;
 			--upgrade)
 				UPGRADE_PROJECT="${argv[$i]}"
