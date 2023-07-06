@@ -248,10 +248,6 @@ function build_config_to_bzl() {
 	echo "# SPDX-License-Identifier: GPL-2.0" 	>  ${PROJECT_DIR}/project.bzl
 	echo 						>> ${PROJECT_DIR}/project.bzl
 
-	echo "AMLOGIC_MODULES_ANDROID = [" 		>> ${PROJECT_DIR}/project.bzl
-	echo "    \"common_drivers/drivers/tty/serial/amlogic-uart.ko\","	>> ${PROJECT_DIR}/project.bzl
-	echo "]" 					>> ${PROJECT_DIR}/project.bzl
-
 	echo 						>> ${PROJECT_DIR}/project.bzl
 	echo "EXT_MODULES_ANDROID = [" 			>> ${PROJECT_DIR}/project.bzl
 	local ext_modules
@@ -263,6 +259,20 @@ function build_config_to_bzl() {
 		fi
 	done
 	echo "]" 					>> ${PROJECT_DIR}/project.bzl
+
+	echo                                            >> ${PROJECT_DIR}/project.bzl
+	echo "VENDOR_MODULES_REMOVE = ["               >> ${PROJECT_DIR}/project.bzl
+	for module in ${VENDOR_MODULES_REMOVE}; do
+		echo "    \"${module}\","		>> ${PROJECT_DIR}/project.bzl
+	done
+	echo "]"					>> ${PROJECT_DIR}/project.bzl
+
+	echo                                            >> ${PROJECT_DIR}/project.bzl
+	echo "VENDOR_MODULES_ADD = ["               	>> ${PROJECT_DIR}/project.bzl
+	for module in ${VENDOR_MODULES_ADD}; do
+		echo "    \"${module}\","		>> ${PROJECT_DIR}/project.bzl
+	done
+	echo "]"					>> ${PROJECT_DIR}/project.bzl
 }
 
 function build_config_to_build_config() {
@@ -313,20 +323,17 @@ function build_common_5.15() {
 		SKIP_MRPROPER=1
 	fi
 	cd ${MAIN_FOLDER}
-	if [[ -n ${CONFIG_UPGRADE} ]]; then
-		ANDROID_VERSION=${CONFIG_UPGRADE}
-	else
-		local android_version='o'
-		local android_version_number=8
-		local k_android_version=$(grep BRANCH= ${KERNEL_REPO}/${KERNEL_DIR}/build.config.constants)
-		k_android_version=${k_android_version#*android}
-		k_android_version=${k_android_version%%-*}
-		local version_diff=$((${k_android_version} - ${android_version_number}))
-		android_version=$(printf "%d" "'${android_version}")
-		android_version=$((${android_version} + ${version_diff}))
-		ANDROID_VERSION=$(echo ${android_version} | awk '{printf("%c", $1)}')
-	fi
+	local android_version='o'
+	local android_version_number=8
+	local k_android_version=$(grep BRANCH= ${KERNEL_REPO}/${KERNEL_DIR}/build.config.constants)
+	k_android_version=${k_android_version#*android}
+	k_android_version=${k_android_version%%-*}
+	local version_diff=$((${k_android_version} - ${android_version_number}))
+	android_version=$(printf "%d" "'${android_version}")
+	android_version=$((${android_version} + ${version_diff}))
+	ANDROID_VERSION=$(echo ${android_version} | awk '{printf("%c", $1)}')
 	export ANDROID_VERSION
+
 	if [ $KERNEL_A32_SUPPORT ]; then
 		BUILD_CONFIG_ANDROID=${PRODUCT_DIRNAME}/build.config.meson.arm.trunk.5.15
 	else
@@ -369,7 +376,20 @@ function build_common_5.15() {
 	fi
 
 	[[ "${KERNEL_A32_SUPPORT}" == "true" ]] && sub_parameters="$sub_parameters --arch arm"
-	[[ -n ${CONFIG_UPGRADE} ]] && sub_parameters="$sub_parameters --upgrade ${ANDROID_VERSION}"
+	if [[ -n ${UPGRADE_PROJECT} ]]; then
+		ANDROID_VERSION=${UPGRADE_PROJECT}
+		sub_parameters="$sub_parameters --upgrade ${ANDROID_VERSION}"
+	fi
+	if [[ -n ${DEV_CONFIGS} ]]; then
+		sub_parameters="$sub_parameters --dev_config"
+		for config in ${DEV_CONFIGS}; do
+			if [[ -f ${MAIN_FOLDER}/project/amlogic/${PRODUCT_DIR}/${config} ]]; then # relative path search
+				sub_parameters="$sub_parameters ${MAIN_FOLDER}/project/amlogic/${PRODUCT_DIR}/${config}"
+			else
+				sub_parameters="$sub_parameters ${config}"
+			fi
+		done
+	fi
 	sub_parameters="$sub_parameters --android_project ${BOARD_DEVICENAME}"
 	echo sub_parameters=$sub_parameters
 
@@ -656,7 +676,7 @@ function bin_path_parser() {
 				export CONFIG_REPLACE_GKI_IMAGE=true
 				continue ;;
 			--upgrade)
-				CONFIG_UPGRADE="${argv[$i]}"
+				UPGRADE_PROJECT="${argv[$i]}"
 				continue ;;
 			--modules)
 				CONFIG_ONE_MODULES="${argv[$i]}"
