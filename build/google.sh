@@ -26,7 +26,7 @@ common_kernel=${common%%/*}
 
 if [[ "${clean}" == "1" ]]; then
 	(cd ${common_kernel}/common; git checkout .)
-	(cd driver_modules/wifi_bt/wifi; git checkout .)
+	[[ -d out ]] && rm -rf out
 	./mk clean
 	exit
 fi
