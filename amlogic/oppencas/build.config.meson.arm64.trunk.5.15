@@ -8,11 +8,15 @@ FILES_ANDROID="
 "
 
 EXT_MODULES_ANDROID="
-	driver_modules/gpu/bifrost
-	driver_modules/media_modules
-	driver_modules/DTVKit/AFD
-	driver_modules/wifi_bt/bt
-	driver_modules/wifi_bt/wifi
+	//driver_modules/gpu/bifrost:gpu
+	//driver_modules/media_modules:media
+	//driver_modules/DTVKit/AFD:afd
+	//driver_modules/wifi_bt/wifi:wlan
+	//driver_modules/wifi_bt/bt:bt
+"
+
+FIRMWARES_COPY_FROM_TO="
+	driver_modules/media_modules/firmware:video
 "
 
 VENDOR_MODULES_LOAD_BLACK_LIST="

@@ -45,11 +45,17 @@ fi
 if [[ "${BAZEL}" == "1" ]]; then
 	cp -a ${OUT_AMLOGIC_DIR}/ext_modules/*.ko ${DEVICE_KERNEL_DIR}/lib/modules/
 
-	for src_dst in ${FILES_COPY}; do
-		src=`echo ${src_dst} | cut -d '+' -f 1`
-		dst=`echo ${src_dst} | cut -d '+' -f 2`
-		mkdir -p ${DEVICE_KERNEL_DIR}/lib/${dst}
-		cp -a ${src} ${DEVICE_KERNEL_DIR}/lib/${dst}
+	for src_dst in ${FIRMWARES_COPY_FROM_TO}; do
+		src=`echo ${src_dst} | cut -d ':' -f 1`
+		dst=`echo ${src_dst} | cut -d ':' -f 2`
+		if [[ -d ${KERNEL_REPO}/${src} ]]; then
+			mkdir -p ${DEVICE_KERNEL_DIR}/lib/firmware/${dst}
+			cp -a ${KERNEL_REPO}/${src}/* ${DEVICE_KERNEL_DIR}/lib/firmware/${dst}
+		else
+			dst_dir=`dirname ${DEVICE_KERNEL_DIR}/lib/firmware/${dst}`
+			mkdir -p ${dst_dir}
+			cp -a ${KERNEL_REPO}/${src} ${DEVICE_KERNEL_DIR}/lib/firmware/${dst}
+		fi
 	done
 fi
 cp ${OUT_AMLOGIC_DIR}/modules/vendor/*.ko ${DEVICE_KERNEL_DIR}/lib/modules/

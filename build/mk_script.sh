@@ -245,7 +245,7 @@ function build_common_5.4() {
 
 function build_config_to_bzl() {
 	[[ -f ${PROJECT_DIR}/project.bazel ]] || touch ${PROJECT_DIR}/project.bzl
-	echo "# SPDX-License-Identifier: GPL-2.0" 	> ${PROJECT_DIR}/project.bzl
+	echo "# SPDX-License-Identifier: GPL-2.0" 	>  ${PROJECT_DIR}/project.bzl
 	echo 						>> ${PROJECT_DIR}/project.bzl
 
 	echo "AMLOGIC_MODULES_ANDROID = [" 		>> ${PROJECT_DIR}/project.bzl
@@ -254,36 +254,15 @@ function build_config_to_bzl() {
 
 	echo 						>> ${PROJECT_DIR}/project.bzl
 	echo "EXT_MODULES_ANDROID = [" 			>> ${PROJECT_DIR}/project.bzl
-	export FILES_COPY=
 	local ext_modules
 	for ext_module in ${EXT_MODULES_ANDROID}; do
-		if [[ "${ext_module}" =~ "driver_modules/media_modules" ]]; then
-			echo "    \"//driver_modules/media_modules:media\"," 		>> ${PROJECT_DIR}/project.bzl
-			ext_modules="${MAIN_FOLDER}/${KERNEL_REPO}/driver_modules/media_modules ${ext_modules}"
-			FILES_COPY="${KERNEL_REPO}/driver_modules/media_modules/firmware/*+firmware/video/ ${FILES_COPY}"
-		elif [[ "${ext_module}" =~ "driver_modules/gpu/bifrost" ]]; then
-			echo "    \"//driver_modules/gpu/bifrost:gpu\"," 		>> ${PROJECT_DIR}/project.bzl
-			ext_modules="${MAIN_FOLDER}/${KERNEL_REPO}/driver_modules/gpu/bifrost ${ext_modules}"
-		elif [[ "${ext_module}" =~ "driver_modules/gpu/valhall" ]]; then
-			echo "    \"//driver_modules/gpu/valhall:gpu\"," 		>> ${PROJECT_DIR}/project.bzl
-			ext_modules="${MAIN_FOLDER}/${KERNEL_REPO}/driver_modules/gpu/valhall ${ext_modules}"
-		elif [[ "${ext_module}" =~ "driver_modules/DTVKit/AFD" ]]; then
-			echo "    \"//driver_modules/DTVKit/AFD:afd\"," 		>> ${PROJECT_DIR}/project.bzl
-			ext_modules="${MAIN_FOLDER}/${KERNEL_REPO}/driver_modules/DTVKit/AFD ${ext_modules}"
-		elif [[ "${ext_module}" =~ "driver_modules/wifi_bt/bt" ]]; then
-			echo "    \"//driver_modules/wifi_bt/bt:bt\"," 	>> ${PROJECT_DIR}/project.bzl
-			ext_modules="${MAIN_FOLDER}/${KERNEL_REPO}/driver_modules/wifi_bt/bt ${ext_modules}"
-		elif [[ "${ext_module}" =~ "driver_modules/wifi_bt/wifi" ]]; then
-			echo "    \"//driver_modules/wifi_bt/wifi:wlan\"," 		>> ${PROJECT_DIR}/project.bzl
-			ext_modules="${MAIN_FOLDER}/${KERNEL_REPO}/driver_modules/wifi_bt/wifi ${ext_modules}"
+		if [[ "${ext_module:0:2}" == "//" ]]; then
+			echo "    \"${ext_module}\","	>> ${PROJECT_DIR}/project.bzl
 		else
-			echo "${ext_module} cna't support bazel build"
-			ext_modules="${ext_module} ${ext_modules}"
-			#exit
+			echo "    \"//${ext_module}\","	>> ${PROJECT_DIR}/project.bzl
 		fi
 	done
 	echo "]" 					>> ${PROJECT_DIR}/project.bzl
-	EXT_MODULES_ANDROID=${ext_modules}
 }
 
 function build_config_to_build_config() {
@@ -355,12 +334,6 @@ function build_common_5.15() {
 	fi
 	. ${MAIN_FOLDER}/${BUILD_CONFIG_ANDROID}
 
-	local ext_modules
-	for ext_mod in ${EXT_MODULES_ANDROID}; do
-		ext_modules="${MAIN_FOLDER}/${ext_mod} ${ext_modules}"
-	done
-	EXT_MODULES_ANDROID=${ext_modules}
-
 	local prebuilt_modules_path
 	local module_path
 	for module_path in ${PREBUILT_MODULES_PATH}; do
@@ -375,7 +348,17 @@ function build_common_5.15() {
 		export CONFIG_KERNEL_FCC_PIP=true
 	fi
 
-	if [[ "${FULL_KERNEL_VERSION}" != "common13-5.15" && "${KERNEL_A32_SUPPORT}" != "true" ]]; then
+	if [[ "${FULL_KERNEL_VERSION}" == "common13-5.15" || "${KERNEL_A32_SUPPORT}" == "true" || ${BAZEL} == 0 ]]; then
+		local ext_modules
+		for ext_mod in ${EXT_MODULES_ANDROID}; do
+			ext_mod=`echo ${ext_mod} | cut -d ':' -f1`
+			if [[ "${ext_module:0:2}" == "//" ]]; then
+				ext_module=${ext_module:2}
+			fi
+			ext_modules="${MAIN_FOLDER}/${KERNEL_REPO}/${ext_mod} ${ext_modules}"
+		done
+		EXT_MODULES_ANDROID=${ext_modules}
+	else
 		local common_drivers=${KERNEL_REPO}/common/common_drivers
 		PROJECT_DIR=${common_drivers}/project
 		[[ ! -d ${common_drivers} ]] && echo "no common_drivers: ${common_drivers}" && exit
