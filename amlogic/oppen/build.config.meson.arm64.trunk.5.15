@@ -1,4 +1,4 @@
-KERNEL_DEVICETREE="s4d_s905y4_ap222_drm s4_s905y4_ap222_drm"
+KERNEL_DEVICETREE="s4d_s905y4_ap222_drm s4_s905y4_ap222_drm s4_s905y4_ap223_drm s4d_s905y4_ap223_drm"
 
 MAKE_GOALS_ANDROID="
 "
