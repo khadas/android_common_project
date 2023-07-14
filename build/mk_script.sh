@@ -355,14 +355,15 @@ function build_common_5.15() {
 		export CONFIG_KERNEL_FCC_PIP=true
 	fi
 
+	EXT_MODULES_ANDROID="${EXT_MODULES_ANDROID} ${EXT_MODULES_ANDROID_AUTO_LOAD}"
 	if [[ "${FULL_KERNEL_VERSION}" == "common13-5.15" || "${KERNEL_A32_SUPPORT}" == "true" || ${BAZEL} == 0 ]]; then
 		local ext_modules
-		for ext_mod in ${EXT_MODULES_ANDROID}; do
-			ext_mod=`echo ${ext_mod} | cut -d ':' -f1`
+		for ext_module in ${EXT_MODULES_ANDROID}; do
+			ext_module=`echo ${ext_module} | cut -d ':' -f1`
 			if [[ "${ext_module:0:2}" == "//" ]]; then
 				ext_module=${ext_module:2}
 			fi
-			ext_modules="${MAIN_FOLDER}/${KERNEL_REPO}/${ext_mod} ${ext_modules}"
+			ext_modules="${MAIN_FOLDER}/${KERNEL_REPO}/${ext_module} ${ext_modules}"
 		done
 		EXT_MODULES_ANDROID=${ext_modules}
 	else
@@ -373,6 +374,18 @@ function build_common_5.15() {
 
 		build_config_to_bzl
 		build_config_to_build_config
+	fi
+
+	if [[ -n ${EXT_MODULES_ANDROID_AUTO_LOAD} ]]; then
+		local ext_modules
+		for ext_module in ${EXT_MODULES_ANDROID_AUTO_LOAD}; do
+			ext_module=`echo ${ext_module} | cut -d ':' -f1`
+			if [[ "${ext_module:0:2}" == "//" ]]; then
+				ext_module=${ext_module:2}
+			fi
+			ext_modules="${ext_module} ${ext_modules}"
+		done
+		EXT_MODULES_ANDROID_AUTO_LOAD=${ext_modules}
 	fi
 
 	[[ "${KERNEL_A32_SUPPORT}" == "true" ]] && sub_parameters="$sub_parameters --arch arm"
