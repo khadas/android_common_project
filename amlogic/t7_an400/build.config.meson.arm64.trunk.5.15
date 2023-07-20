@@ -12,6 +12,7 @@ EXT_MODULES_ANDROID="
 	//driver_modules/media_modules:media
 	//driver_modules/wifi_bt/wifi:wlan
 	//driver_modules/wifi_bt/bt:bt
+	//driver_modules/camera/t7c_515_cam/driver:camera
 "
 
 GPU_DRV_VERSION=r38p1
