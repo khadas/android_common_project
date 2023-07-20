@@ -16,6 +16,9 @@ EXT_MODULES_ANDROID="
 EXT_MODULES_ANDROID_AUTO_LOAD="
 "
 
+KCONFIG_EXT_ANDOIRD="
+"
+
 FIRMWARES_COPY_FROM_TO="
 	driver_modules/media_modules/firmware:video
 "

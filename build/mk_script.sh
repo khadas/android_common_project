@@ -261,14 +261,14 @@ function build_config_to_bzl() {
 	echo "]" 					>> ${PROJECT_DIR}/project.bzl
 
 	echo                                            >> ${PROJECT_DIR}/project.bzl
-	echo "VENDOR_MODULES_REMOVE = ["               >> ${PROJECT_DIR}/project.bzl
+	echo "VENDOR_MODULES_REMOVE = [" 		>> ${PROJECT_DIR}/project.bzl
 	for module in ${VENDOR_MODULES_REMOVE}; do
 		echo "    \"${module}\","		>> ${PROJECT_DIR}/project.bzl
 	done
 	echo "]"					>> ${PROJECT_DIR}/project.bzl
 
-	echo                                            >> ${PROJECT_DIR}/project.bzl
-	echo "VENDOR_MODULES_ADD = ["               	>> ${PROJECT_DIR}/project.bzl
+	echo 						>> ${PROJECT_DIR}/project.bzl
+	echo "VENDOR_MODULES_ADD = [" 			>> ${PROJECT_DIR}/project.bzl
 	for module in ${VENDOR_MODULES_ADD}; do
 		echo "    \"${module}\","		>> ${PROJECT_DIR}/project.bzl
 	done
@@ -289,6 +289,34 @@ function build_config_to_build_config() {
 	echo "WIFI_TRUNK_CONFIG=${WIFI_TRUNK_CONFIG}"	>> ${PROJECT_DIR}/build.config.project
 	echo "PRODUCT_DIR=${BOARD_DEVICENAME}" 		>> ${PROJECT_DIR}/build.config.project
 	[[ -n ${GPU_DRV_VERSION} ]] && echo "GPU_DRV_VERSION=${GPU_DRV_VERSION}" >> ${PROJECT_DIR}/build.config.project
+}
+
+function build_config_to_modules_kconfig() {
+	[[ -f ${PROJECT_DIR}/Kconfig.ext_modules ]] || touch ${PROJECT_DIR}/Kconfig.ext_modules
+	echo "# SPDX-License-Identifier: GPL-2.0" 	> ${PROJECT_DIR}/Kconfig.ext_modules
+	echo 						>> ${PROJECT_DIR}/Kconfig.ext_modules
+
+	if [[ ${BAZEL} == 1 ]]; then
+		echo                                            >> ${PROJECT_DIR}/project.bzl
+		echo "KCONFIG_EXT_SRCS = ["               	>> ${PROJECT_DIR}/project.bzl
+		echo "    \"${COMMON_DRIVERS_DIR}/Kconfig.ext\","	>> ${PROJECT_DIR}/project.bzl
+		echo "    \"${COMMON_DRIVERS_DIR}/project/Kconfig.ext_modules\","	>> ${PROJECT_DIR}/project.bzl
+	fi
+	for kconfig in ${KCONFIG_EXT_ANDOIRD}; do
+		if [[ ${BAZEL} == 1 ]]; then
+			echo "    \"${kconfig}\","		>> ${PROJECT_DIR}/project.bzl
+		fi
+		if [[ "${kconfig:0:2}" == "//" ]]; then
+			kconfig=${kconfig:2}
+		fi
+		kconfig_dir=${kconfig%:*}
+		echo kconfig_dir=${kconfig_dir}
+		echo "source \"\$(KCONFIG_EXT_MODULES_PREFIX)${kconfig_dir}/Kconfig\""	>> ${PROJECT_DIR}/Kconfig.ext_modules
+	done
+	if [[ ${BAZEL} == 1 ]]; then
+		echo "]"					>> ${PROJECT_DIR}/project.bzl
+	fi
+
 }
 
 function build_common_5.15() {
@@ -356,6 +384,10 @@ function build_common_5.15() {
 	fi
 
 	EXT_MODULES_ANDROID="${EXT_MODULES_ANDROID} ${EXT_MODULES_ANDROID_AUTO_LOAD}"
+	local common_drivers=${KERNEL_REPO}/${KERNEL_DIR}/${COMMON_DRIVERS_DIR}
+	PROJECT_DIR=${common_drivers}/project
+	[[ ! -d ${common_drivers} ]] && echo "no common_drivers: ${common_drivers}" && exit
+	[[ -d ${PROJECT_DIR} ]] || mkdir -p ${PROJECT_DIR}
 	if [[ "${FULL_KERNEL_VERSION}" == "common13-5.15" || "${KERNEL_A32_SUPPORT}" == "true" || ${BAZEL} == 0 ]]; then
 		local ext_modules
 		for ext_module in ${EXT_MODULES_ANDROID}; do
@@ -367,14 +399,11 @@ function build_common_5.15() {
 		done
 		EXT_MODULES_ANDROID=${ext_modules}
 	else
-		local common_drivers=${KERNEL_REPO}/common/common_drivers
-		PROJECT_DIR=${common_drivers}/project
-		[[ ! -d ${common_drivers} ]] && echo "no common_drivers: ${common_drivers}" && exit
-		[[ -d ${PROJECT_DIR} ]] || mkdir -p ${PROJECT_DIR}
-
+		BAZEL=1
 		build_config_to_bzl
 		build_config_to_build_config
 	fi
+	build_config_to_modules_kconfig
 
 	if [[ -n ${EXT_MODULES_ANDROID_AUTO_LOAD} ]]; then
 		local ext_modules
