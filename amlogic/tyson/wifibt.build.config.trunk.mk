@@ -19,7 +19,7 @@ CONFIG_BLUETOOTH_MODULES ?= multibt
 #You can get the latest supported list by executing the make command:
 #cd vendor/amlogic/common/wifi_bt/wifi/tools && make get_modules
 ########################################################################
-CONFIG_WIFI_MODULES ?= rtl8852be w2
+CONFIG_WIFI_MODULES ?= w1
 
 #If environment variable 'MULTI_WIFI' is not set to 'false',then ignore the above 'CONFIG_WIFI_MODULES' and compile all currently supported WiFi
 
