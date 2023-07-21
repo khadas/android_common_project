@@ -1,11 +1,5 @@
 KERNEL_DEVICETREE="s4d_s905y4_ap222_drm s4_s905y4_ap222_drm s4_s905y4_ap223_drm s4d_s905y4_ap223_drm"
 
-MAKE_GOALS_ANDROID="
-"
-
-FILES_ANDROID="
-"
-
 EXT_MODULES_ANDROID="
 	//driver_modules/gpu/bifrost:gpu
 	//driver_modules/media_modules:media
@@ -13,6 +7,8 @@ EXT_MODULES_ANDROID="
 	//driver_modules/wifi_bt/wifi:wlan
 	//driver_modules/wifi_bt/bt:bt
 "
+
+GPU_DRV_VERSION=r38p1
 
 EXT_MODULES_ANDROID_AUTO_LOAD="
 "
@@ -24,19 +20,25 @@ FIRMWARES_COPY_FROM_TO="
 	driver_modules/media_modules/firmware:video
 "
 
-VENDOR_MODULES_LOAD_BLACK_LIST="
-	amlogic_pcie_v2_host.ko
-"
-
 TYPE_MODULE_SELECT_MODULE_ANDROID="
 	amlogic-clk-soc-* 1 amlogic-clk-soc-s4.ko
 	amlogic-pinctrl-soc-* 1 amlogic-pinctrl-soc-s4.ko
 	amlogic-snd-codec-* 2 amlogic-snd-codec-dummy.ko amlogic-snd-codec-t9015.ko
 "
 
-GPU_DRV_VERSION=r38p1
+MODULES_LOAD_BLACK_LIST="
+	amlogic_pcie_v2_host.ko
+"
 
-ANDROID_PROJECT_MODULES_SERVICE_LOAD_LIST="
+MODULES_SERVICE_LOAD_LIST="
+"
+
+EXTRA_GKI_MODULES_LIST="
+"
+
+MODULES_SEQUENCE_LIST=
+
+DEV_CONFIGS="
 "
 
 GKI_CONFIG=gki_10

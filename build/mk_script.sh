@@ -345,7 +345,7 @@ function build_common_5.15() {
 	export COMMON_DRIVERS_DIR=common_drivers
 	export BOARD_DEVICENAME=$1
 	export BOARD_MANUFACTURER=${device_project}
-	export PRODUCT_DIRNAME=project/amlogic/${BOARD_DEVICENAME}
+	export PRODUCT_DIRNAME=project/${BOARD_MANUFACTURER}/${BOARD_DEVICENAME}
 
 	if [ ${SKIP_MRPROPER} = "true" ]; then
 		SKIP_MRPROPER=1
@@ -363,8 +363,10 @@ function build_common_5.15() {
 	export ANDROID_VERSION
 
 	if [ $KERNEL_A32_SUPPORT ]; then
+		ARCH=arm
 		BUILD_CONFIG_ANDROID=${PRODUCT_DIRNAME}/build.config.meson.arm.trunk.5.15
 	else
+		ARCH=arm64
 		BUILD_CONFIG_ANDROID=${PRODUCT_DIRNAME}/build.config.meson.arm64.trunk.5.15
 	fi
 	. ${MAIN_FOLDER}/${BUILD_CONFIG_ANDROID}
@@ -417,20 +419,36 @@ function build_common_5.15() {
 		EXT_MODULES_ANDROID_AUTO_LOAD=${ext_modules}
 	fi
 
+	if [[ -n ${DEV_CONFIGS} ]]; then
+		local dev_configs
+		local copy_dev_configs
+		for config in ${DEV_CONFIGS}; do
+			if [[ -f ${MAIN_FOLDER}/${PRODUCT_DIRNAME}/${config} ]]; then
+				if [[ ${BAZEL} == 1 ]]; then
+					cp ${MAIN_FOLDER}/${PRODUCT_DIRNAME}/${config} ${common_drivers}/arch/${ARCH}/configs
+					copy_dev_configs="${copy_dev_configs} ${config}"
+					dev_configs="${dev_configs} ${config}"
+				else
+					dev_configs="${dev_configs} ${MAIN_FOLDER}/${PRODUCT_DIRNAME}/${config}"
+				fi
+			else
+				dev_configs="${dev_configs} ${config}"
+			fi
+		done
+		DEV_CONFIGS=`echo ${dev_configs} | sed -e 's/^[ ]*//g' | sed -e 's/[ ]*$//g'`
+		export COPY_DEV_CONFIGS=`echo ${copy_dev_configs} | sed -e 's/^[ ]*//g' | sed -e 's/[ ]*$//g'`
+	fi
+
+	if [[ -n ${MODULES_SEQUENCE_LIST} ]]; then
+		if [[ -f ${MAIN_FOLDER}/${PRODUCT_DIRNAME}/${MODULES_SEQUENCE_LIST} ]]; then
+			MODULES_SEQUENCE_LIST="${MAIN_FOLDER}/${PRODUCT_DIRNAME}/${MODULES_SEQUENCE_LIST}"
+		fi
+	fi
+
 	[[ "${KERNEL_A32_SUPPORT}" == "true" ]] && sub_parameters="$sub_parameters --arch arm"
 	if [[ -n ${UPGRADE_PROJECT} ]]; then
 		ANDROID_VERSION=${UPGRADE_PROJECT}
 		sub_parameters="$sub_parameters --upgrade ${ANDROID_VERSION}"
-	fi
-	if [[ -n ${DEV_CONFIGS} ]]; then
-		sub_parameters="$sub_parameters --dev_config"
-		for config in ${DEV_CONFIGS}; do
-			if [[ -f ${MAIN_FOLDER}/project/amlogic/${PRODUCT_DIR}/${config} ]]; then # relative path search
-				sub_parameters="$sub_parameters ${MAIN_FOLDER}/project/amlogic/${PRODUCT_DIR}/${config}"
-			else
-				sub_parameters="$sub_parameters ${config}"
-			fi
-		done
 	fi
 	[[ "${KASAN_ENABLED}" == "true" ]] && sub_parameters="$sub_parameters --kasan"
 	sub_parameters="$sub_parameters --android_project ${BOARD_DEVICENAME}"
