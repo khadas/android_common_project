@@ -111,17 +111,13 @@ function build_anning() {
 }
 
 function copy_out() {
-	SRC_PATH=$1
+	SRC_PATH=${KERNEL_REPO}/out/android/${BOARD_DEVICENAME}
 	if [ ${ANDROID_OUT_DIR} -a -d ${ANDROID_OUT_DIR} ]; then
 		echo "copy kernel to incoming android out dir"
 		rm -rf ${ANDROID_OUT_DIR}/*
 		cp -a ${SRC_PATH}/* ${ANDROID_OUT_DIR}/
 	else
-		if [ "$2" = "adt4" ]; then
-			ANDROID_PROJECT_PATH=device/sei/adt4-kernel
-		else
-			ANDROID_PROJECT_PATH=device/amlogic/$2-kernel
-		fi
+		ANDROID_PROJECT_PATH=device/${BOARD_MANUFACTURER}/${BOARD_DEVICENAME}-kernel
 		if [ $KERNEL_A32_SUPPORT ]; then
 			if [[ -d ${MAIN_FOLDER}/../${ANDROID_PROJECT_PATH} ]]; then
 				DST_PATH=${MAIN_FOLDER}/../${ANDROID_PROJECT_PATH}/32/${KERNEL_VERSION}
@@ -280,13 +276,14 @@ function build_config_to_build_config() {
 	echo "# SPDX-License-Identifier: GPL-2.0" 	> ${PROJECT_DIR}/build.config.project
 	echo 						>> ${PROJECT_DIR}/build.config.project
 
-	export WIFI_TRUNK_CONFIG=${MAIN_FOLDER}/${PRODUCT_DIRNAME}/wifibt.build.config.trunk.mk
-	if [ -d "${MAIN_FOLDER}/common14-5.15/driver_modules/wifi_bt/wifi" ]; then
-		make -f ${MAIN_FOLDER}/common14-5.15/driver_modules/wifi_bt/wifi/configs/get_module.mk TOP_DIR=$MAIN_FOLDER BOARD=$BOARD_DEVICENAME DRIVER_IN_KERNEL=true
-	else
-		make -f ${MAIN_FOLDER}/driver_modules/wifi_bt/wifi/configs/get_module.mk TOP_DIR=$MAIN_FOLDER BOARD=$BOARD_DEVICENAME
-	fi
+	export WIFI_TRUNK_CONFIG=${MAIN_FOLDER}/${PROJECT_CONFIG_DIR}/wifibt.build.config.trunk.mk
 	echo "WIFI_TRUNK_CONFIG=${WIFI_TRUNK_CONFIG}"	>> ${PROJECT_DIR}/build.config.project
+	if [ -d "${MAIN_FOLDER}/common14-5.15/driver_modules/wifi_bt/wifi" ]; then
+		make -f ${MAIN_FOLDER}/common14-5.15/driver_modules/wifi_bt/wifi/configs/get_module.mk TOP_DIR=${MAIN_FOLDER} BOARD=${BOARD_DEVICENAME} MANUFACTURER=${BOARD_MANUFACTURER} DRIVER_IN_KERNEL=true
+	else
+		make -f ${MAIN_FOLDER}/driver_modules/wifi_bt/wifi/configs/get_module.mk TOP_DIR=${MAIN_FOLDER} BOARD=${BOARD_DEVICENAME} MANUFACTURER=${BOARD_MANUFACTURER}
+	fi
+
 	echo "PRODUCT_DIR=${BOARD_DEVICENAME}" 		>> ${PROJECT_DIR}/build.config.project
 	[[ -n ${GPU_DRV_VERSION} ]] && echo "GPU_DRV_VERSION=${GPU_DRV_VERSION}" >> ${PROJECT_DIR}/build.config.project
 }
@@ -345,7 +342,7 @@ function build_common_5.15() {
 	export COMMON_DRIVERS_DIR=common_drivers
 	export BOARD_DEVICENAME=$1
 	export BOARD_MANUFACTURER=${device_project}
-	export PRODUCT_DIRNAME=project/${BOARD_MANUFACTURER}/${BOARD_DEVICENAME}
+	export PROJECT_CONFIG_DIR=project/${BOARD_MANUFACTURER}/${BOARD_DEVICENAME}
 
 	if [ ${SKIP_MRPROPER} = "true" ]; then
 		SKIP_MRPROPER=1
@@ -364,10 +361,10 @@ function build_common_5.15() {
 
 	if [ $KERNEL_A32_SUPPORT ]; then
 		ARCH=arm
-		BUILD_CONFIG_ANDROID=${PRODUCT_DIRNAME}/build.config.meson.arm.trunk.5.15
+		BUILD_CONFIG_ANDROID=${PROJECT_CONFIG_DIR}/build.config.meson.arm.trunk.5.15
 	else
 		ARCH=arm64
-		BUILD_CONFIG_ANDROID=${PRODUCT_DIRNAME}/build.config.meson.arm64.trunk.5.15
+		BUILD_CONFIG_ANDROID=${PROJECT_CONFIG_DIR}/build.config.meson.arm64.trunk.5.15
 	fi
 	. ${MAIN_FOLDER}/${BUILD_CONFIG_ANDROID}
 
@@ -423,13 +420,13 @@ function build_common_5.15() {
 		local dev_configs
 		local copy_dev_configs
 		for config in ${DEV_CONFIGS}; do
-			if [[ -f ${MAIN_FOLDER}/${PRODUCT_DIRNAME}/${config} ]]; then
+			if [[ -f ${MAIN_FOLDER}/${PROJECT_CONFIG_DIR}/${config} ]]; then
 				if [[ ${BAZEL} == 1 ]]; then
-					cp ${MAIN_FOLDER}/${PRODUCT_DIRNAME}/${config} ${common_drivers}/arch/${ARCH}/configs
+					cp ${MAIN_FOLDER}/${PROJECT_CONFIG_DIR}/${config} ${common_drivers}/arch/${ARCH}/configs
 					copy_dev_configs="${copy_dev_configs} ${config}"
 					dev_configs="${dev_configs} ${config}"
 				else
-					dev_configs="${dev_configs} ${MAIN_FOLDER}/${PRODUCT_DIRNAME}/${config}"
+					dev_configs="${dev_configs} ${MAIN_FOLDER}/${PROJECT_CONFIG_DIR}/${config}"
 				fi
 			else
 				dev_configs="${dev_configs} ${config}"
@@ -440,8 +437,8 @@ function build_common_5.15() {
 	fi
 
 	if [[ -n ${MODULES_SEQUENCE_LIST} ]]; then
-		if [[ -f ${MAIN_FOLDER}/${PRODUCT_DIRNAME}/${MODULES_SEQUENCE_LIST} ]]; then
-			MODULES_SEQUENCE_LIST="${MAIN_FOLDER}/${PRODUCT_DIRNAME}/${MODULES_SEQUENCE_LIST}"
+		if [[ -f ${MAIN_FOLDER}/${PROJECT_CONFIG_DIR}/${MODULES_SEQUENCE_LIST} ]]; then
+			MODULES_SEQUENCE_LIST="${MAIN_FOLDER}/${PROJECT_CONFIG_DIR}/${MODULES_SEQUENCE_LIST}"
 		fi
 	fi
 
@@ -456,7 +453,7 @@ function build_common_5.15() {
 
 	./project/build/build_kernel_5.15.sh $sub_parameters
 
-	copy_out ${KERNEL_REPO}/out/android/${BOARD_DEVICENAME} ${BOARD_DEVICENAME}
+	copy_out
 }
 
 function build_common() {
@@ -513,6 +510,10 @@ function build() {
 			;;
 		heavenly)
 			device_project="google"
+			build_common $@
+			;;
+		adt4)
+			device_project="sei"
 			build_common $@
 			;;
 		*)
