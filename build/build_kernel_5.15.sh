@@ -157,11 +157,11 @@ for dtb_file in ${KERNEL_DEVICETREE}; do
 done
 if [[ ${dtb_files_count} == 1 ]]; then
 	if [ $CONFIG_KERNEL_FCC_PIP ]; then
-		if [[ ${PRODUCT_DIRNAME} == *"ohm"* ]]; then
+		if [[ ${BOARD_DEVICENAME} == *"ohm"* ]]; then
 			cp -f ${DIST_DIR}/${KERNEL_DEVICETREE}.dtb ${DEVICE_KERNEL_DIR}/ohm_mxl258c.dtb
-		elif [[ ${PRODUCT_DIRNAME} == *"oppencas"* ]]; then
+		elif [[ ${BOARD_DEVICENAME} == *"oppencas"* ]]; then
 			cp -f ${DIST_DIR}/${KERNEL_DEVICETREE}.dtb ${DEVICE_KERNEL_DIR}/oppencas_mxl258c.dtb
-		elif [[ ${PRODUCT_DIRNAME} == *"oppen"* ]]; then
+		elif [[ ${BOARD_DEVICENAME} == *"oppen"* ]]; then
 			cp -f ${DIST_DIR}/${KERNEL_DEVICETREE}.dtb ${DEVICE_KERNEL_DIR}/oppen_mxl258c.dtb
 		else
 			cp -f ${DIST_DIR}/${KERNEL_DEVICETREE}.dtb ${DEVICE_KERNEL_DIR}/${BOARD_DEVICENAME}.dtb
