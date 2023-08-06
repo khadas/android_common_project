@@ -39,28 +39,24 @@ if [ -s ${OUT_AMLOGIC_DIR}/modules/recovery/recovery_modules.order ]; then
 	cp ${OUT_AMLOGIC_DIR}/modules/recovery/*.ko ${DEVICE_KERNEL_DIR}/ramdisk/lib/modules/
 fi
 
-echo "copy vendor_dlkm module ko"
+echo "copy firmware"
 mkdir -p ${DEVICE_KERNEL_DIR}/lib/modules/
-if [[ -d ${COMMON_OUT_DIR}/vendor_lib ]]; then
-	cp -a ${COMMON_OUT_DIR}/vendor_lib/* ${DEVICE_KERNEL_DIR}/lib/
-fi
-if [[ "${BAZEL}" == "1" ]]; then
-	cp -a ${OUT_AMLOGIC_DIR}/ext_modules/*.ko ${DEVICE_KERNEL_DIR}/lib/modules/
+for src_dst in ${FIRMWARES_COPY_FROM_TO}; do
+	src=`echo ${src_dst} | cut -d ':' -f 1`
+	dst=`echo ${src_dst} | cut -d ':' -f 2`
+	if [[ -d ${MAIN_FOLDER}/${src} ]]; then
+		mkdir -p ${DEVICE_KERNEL_DIR}/lib/firmware/${dst}
+		cp -a ${MAIN_FOLDER}/${src}/* ${DEVICE_KERNEL_DIR}/lib/firmware/${dst}
+	else
+		dst_dir=`dirname ${DEVICE_KERNEL_DIR}/lib/firmware/${dst}`
+		mkdir -p ${dst_dir}
+		cp -a ${MAIN_FOLDER}/${src} ${DEVICE_KERNEL_DIR}/lib/firmware/${dst}
+	fi
+done
 
-	for src_dst in ${FIRMWARES_COPY_FROM_TO}; do
-		src=`echo ${src_dst} | cut -d ':' -f 1`
-		dst=`echo ${src_dst} | cut -d ':' -f 2`
-		if [[ -d ${KERNEL_REPO}/${src} ]]; then
-			mkdir -p ${DEVICE_KERNEL_DIR}/lib/firmware/${dst}
-			cp -a ${KERNEL_REPO}/${src}/* ${DEVICE_KERNEL_DIR}/lib/firmware/${dst}
-		else
-			dst_dir=`dirname ${DEVICE_KERNEL_DIR}/lib/firmware/${dst}`
-			mkdir -p ${dst_dir}
-			cp -a ${KERNEL_REPO}/${src} ${DEVICE_KERNEL_DIR}/lib/firmware/${dst}
-		fi
-	done
-fi
-cp ${OUT_AMLOGIC_DIR}/modules/vendor/*.ko ${DEVICE_KERNEL_DIR}/lib/modules/
+echo "copy vendor_dlkm module ko"
+cp -a ${OUT_AMLOGIC_DIR}/modules/vendor/*.ko ${DEVICE_KERNEL_DIR}/lib/modules/
+cp -a ${OUT_AMLOGIC_DIR}/ext_modules/*.ko ${DEVICE_KERNEL_DIR}/lib/modules/
 
 echo "copy service_module ko"
 res=`ls ${OUT_AMLOGIC_DIR}/modules/service_module`
