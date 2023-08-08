@@ -257,8 +257,8 @@ function build_config_to_bzl() {
 	echo "]" 					>> ${PROJECT_DIR}/project.bzl
 
 	echo                                            >> ${PROJECT_DIR}/project.bzl
-	echo "VENDOR_MODULES_REMOVE = [" 		>> ${PROJECT_DIR}/project.bzl
-	for module in ${VENDOR_MODULES_REMOVE}; do
+	echo "GKI_MODULES_OUT_REMOVE = [" 		>> ${PROJECT_DIR}/project.bzl
+	for module in ${GKI_MODULES_OUT_REMOVE}; do
 		echo "    \"${module}\","		>> ${PROJECT_DIR}/project.bzl
 	done
 	echo "]"					>> ${PROJECT_DIR}/project.bzl
