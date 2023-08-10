@@ -31,7 +31,9 @@ cp -rf ${OUT_AMLOGIC_DIR}/symbols ${DEVICE_KERNEL_DIR}/symbols
 
 echo "copy ramdisk module ko"
 mkdir -p ${DEVICE_KERNEL_DIR}/ramdisk/lib/modules/
-cp ${OUT_AMLOGIC_DIR}/modules/ramdisk/*.ko ${DEVICE_KERNEL_DIR}/ramdisk/lib/modules/
+if [ -s ${OUT_AMLOGIC_DIR}/modules/ramdisk/ramdisk_modules.order ]; then
+	cp ${OUT_AMLOGIC_DIR}/modules/ramdisk/*.ko ${DEVICE_KERNEL_DIR}/ramdisk/lib/modules/
+fi
 
 if [ -s ${OUT_AMLOGIC_DIR}/modules/recovery/recovery_modules.order ]; then
 	cp ${OUT_AMLOGIC_DIR}/modules/recovery/*.ko ${DEVICE_KERNEL_DIR}/ramdisk/lib/modules/
