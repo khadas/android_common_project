@@ -32,9 +32,6 @@ TYPE_MODULE_SELECT_MODULE_ANDROID="
 	amlogic-snd-codec-* 3 amlogic-snd-codec-dummy.ko amlogic-snd-codec-tas5707.ko amlogic-snd-codec-tl1.ko
 "
 
-GKI_MODULES_OUT_REMOVE="
-"
-
 MODULES_LOAD_BLACK_LIST="
 "
 
