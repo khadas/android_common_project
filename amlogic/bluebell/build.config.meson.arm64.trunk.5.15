@@ -1,11 +1,4 @@
-if [[ -n ${BOARD_COMPILE_HDMITX_ONLY} && \
-         `echo "${BOARD_COMPILE_HDMITX_ONLY}" \
-         |awk '{print length($0)}'` -eq 4 ]];then
-echo "set kernel device tree to t7 hdmi only"
 KERNEL_DEVICETREE="t7c_a311d2_an400_bluebell-hdmitx-only-4g"
-else
-KERNEL_DEVICETREE="t7c_a311d2_an400_bluebell_4g t7c_a311d2_an400_bluebell_8g t7_a311d2_an400_bluebell"
-fi
 
 EXT_MODULES_ANDROID="
 	//driver_modules/gpu/bifrost:gpu
