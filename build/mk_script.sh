@@ -14,102 +14,6 @@ function clean() {
 	return
 }
 
-function build_deadpool() {
-	echo "------project/askey/deadppol/build.config.meson.arm64.deadpool-----"
-	cd ${MAIN_FOLDER}
-	export BUILD_CONFIG=project/askey/deadpool/build.config.meson.arm64.deadpool
-
-	. ${MAIN_FOLDER}/${BUILD_CONFIG}
-	export $(sed -n -e 's/\([^=]\)=.*/\1/p' ${MAIN_FOLDER}/${BUILD_CONFIG})
-	if [ $CONFIG_AB_UPDATE ]; then
-		echo "=====ab update mode====="
-		for aDts in ${KERNEL_DEVICETREE}; do
-			sed -i 's/^#include \"partition_.*/#include "partition_mbox_normal_dynamic_ab.dtsi"/' ${KERNEL_DIR}/arch/arm64/boot/dts/amlogic/$aDts.dts;
-		done
-	else
-		echo "=====normal mode====="
-		for aDts in ${KERNEL_DEVICETREE}; do
-			sed -i 's/^#include \"partition_.*/#include "partition_mbox_dynamic_deadpool.dtsi"/' ${KERNEL_DIR}/arch/arm64/boot/dts/amlogic/$aDts.dts;
-		done
-	fi
-
-	cd ${MAIN_FOLDER}
-	./project/build/build_kernel_4.9.sh
-}
-
-function build_boreal() {
-	echo "------project/google/boreal/build.config.meson.arm64.trunk-----"
-	cd ${MAIN_FOLDER}
-	export BUILD_CONFIG=project/google/boreal/build.config.meson.arm64.trunk
-	export TARGET_BUILD_KERNEL_VERSION=5.4
-        export TARGET_BUILD_KERNEL_4_9=false
-	. ${MAIN_FOLDER}/${BUILD_CONFIG}
-	export $(sed -n -e 's/\([^=]\)=.*/\1/p' ${MAIN_FOLDER}/${BUILD_CONFIG})
-
-	if [ $CONFIG_KERNEL_DDR_1G ]; then
-		export KERNEL_DEVICETREE=${KERNEL_DEVICETREE_DDR_1G}
-	fi
-
-	echo "KERNEL_DEVICETREE: ${KERNEL_DEVICETREE}"
-
-	echo "=====ab update & vendor boot mode====="
-	for aDts in ${KERNEL_DEVICETREE}; do
-		if [ $KERNEL_A32_SUPPORT ]; then
-			sed -i 's/^#include \"partition_.*/#include "partition_mbox_ab.dtsi"/' ${KERNEL_DIR}/arch/arm/boot/dts/amlogic/$aDts.dts;
-		else
-			sed -i 's/^#include \"partition_.*/#include "partition_mbox_ab.dtsi"/' ${KERNEL_DIR}/arch/arm64/boot/dts/amlogic/$aDts.dts;
-		fi
-	done
-
-	echo "================================="
-
-	cd ${MAIN_FOLDER}
-	./project/build/build.sh
-}
-function build_anning() {
-	if [ $KERNEL_A32_SUPPORT ]; then
-		echo "------project/amlogic/ampere/anning/build.config.meson.arm.trunk_4.9-----"
-	else
-		echo "------project/amlogic/ampere/anning/build.config.meson.arm64.trunk_4.9-----"
-	fi
-
-	cd ${MAIN_FOLDER}
-	if [ $KERNEL_A32_SUPPORT ]; then
-		export BUILD_CONFIG=project/amlogic/ampere/anning/build.config.meson.arm.trunk_4.9
-	else
-		export BUILD_CONFIG=project/amlogic/ampere/anning/build.config.meson.arm64.trunk_4.9
-	fi
-
-	export TARGET_BUILD_KERNEL_VERSION=4.9
-        export TARGET_BUILD_KERNEL_4_9=true
-	. ${MAIN_FOLDER}/${BUILD_CONFIG}
-	export $(sed -n -e 's/\([^=]\)=.*/\1/p' ${MAIN_FOLDER}/${BUILD_CONFIG})
-	echo "KERNEL_DEVICETREE: ${KERNEL_DEVICETREE}"
-	if [ $CONFIG_AB_UPDATE ]; then
-		echo "=====ab update mode====="
-		for aDts in ${KERNEL_DEVICETREE}; do
-			if [ $KERNEL_A32_SUPPORT ]; then
-				sed -i 's/^#include \"partition_.*/#include "partition_mbox_normal_dynamic_ab.dtsi"/' ${KERNEL_DIR}/arch/arm/boot/dts/amlogic/$aDts.dts;
-			else
-				sed -i 's/^#include \"partition_.*/#include "partition_mbox_normal_dynamic_ab.dtsi"/' ${KERNEL_DIR}/arch/arm64/boot/dts/amlogic/$aDts.dts;
-			fi
-		done
-	else
-		echo "=====normal mode====="
-		for aDts in ${KERNEL_DEVICETREE}; do
-			if [ $KERNEL_A32_SUPPORT ]; then
-				sed -i 's/^#include \"partition_.*/#include "partition_mbox_normal_dynamic.dtsi"/' ${KERNEL_DIR}/arch/arm/boot/dts/amlogic/$aDts.dts;
-			else
-				sed -i 's/^#include \"partition_.*/#include "partition_mbox_normal_dynamic.dtsi"/' ${KERNEL_DIR}/arch/arm64/boot/dts/amlogic/$aDts.dts;
-			fi
-		done
-	fi
-	echo "================================="
-    echo "KERNEL_DEVICETREE === ${KERNEL_DEVICETREE}"
-	cd ${MAIN_FOLDER}
-	./project/build/build_kernel_4.9.sh
-}
-
 function copy_out() {
 	SRC_PATH=${KERNEL_REPO}/out/android/${BOARD_DEVICENAME}
 	if [ ${ANDROID_OUT_DIR} -a -d ${ANDROID_OUT_DIR} ]; then
@@ -497,30 +401,16 @@ function build() {
 		export SKIP_EXT_MODULES=true
 	fi
 
-	option="${1}"
-	case ${option} in
-		deadpool)
-			build_deadpool
-			;;
-		boreal)
-			build_boreal
-			;;
-		anning)
-		    build_anning
-			;;
-		heavenly)
-			device_project="google"
-			build_common $@
-			;;
-		adt4)
-			device_project="sei"
-			build_common $@
-			;;
-		*)
-			device_project="amlogic"
-			build_common $@
-			;;
-	esac
+
+	device_project=`find project -name ${1}`
+	if [[ -n ${device_project} ]]; then
+		device_project=`echo ${device_project} | cut -d '/' -f 2`
+	else
+		echo "can't find the project"
+		exit
+	fi
+
+	build_common $@
 
 	if [ $? -ne 0 ]; then
 		echo "build kernel error"
