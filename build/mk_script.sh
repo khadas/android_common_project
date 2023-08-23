@@ -628,7 +628,9 @@ function bin_path_parser() {
 				KASAN_ENABLED=true
 				continue ;;
 			--gki_image)
-				[[ ${KASAN_ENABLED} != "true" ]] && export CONFIG_REPLACE_GKI_IMAGE=true
+				if [[ ${KASAN_ENABLED} != "true" && ! ${sub_parameters} =~ "--use_prebuilt_gki" ]]; then
+					export CONFIG_REPLACE_GKI_IMAGE=true
+				fi
 				continue ;;
 			--upgrade)
 				UPGRADE_PROJECT="${argv[$i]}"
