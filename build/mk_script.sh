@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-#  author: xindong.xu@amlogic.com
-#  2020.04.15
+#  author: wanwei.jiang@amlogic.com
+#  2023.08.24
 
 function clean() {
 	echo "Clean up ${MAIN_FOLDER}"
@@ -45,102 +45,6 @@ function copy_out() {
 			cp -a ${SRC_PATH}/* ${DST_PATH}/
 		fi
 	fi
-}
-
-function build_common_4.9() {
-	if [ $KERNEL_A32_SUPPORT ]; then
-		echo "------project/${device_project}/$1/build.config.meson.arm.trunk_4.9-----"
-	else
-		echo "------project/${device_project}/$1/build.config.meson.arm64.trunk_4.9-----"
-	fi
-	cd ${MAIN_FOLDER}
-	if [ $KERNEL_A32_SUPPORT ]; then
-		export BUILD_CONFIG=project/${device_project}/$1/build.config.meson.arm.trunk_4.9
-	else
-		export BUILD_CONFIG=project/${device_project}/$1/build.config.meson.arm64.trunk_4.9
-	fi
-	export TARGET_BUILD_KERNEL_VERSION=4.9
-        export TARGET_BUILD_KERNEL_4_9=true
-
-	. ${MAIN_FOLDER}/${BUILD_CONFIG}
-	export $(sed -n -e 's/\([^=]\)=.*/\1/p' ${MAIN_FOLDER}/${BUILD_CONFIG})
-	echo "KERNEL_DEVICETREE: ${KERNEL_DEVICETREE}"
-	if [ $CONFIG_AB_UPDATE ]; then
-		echo "=====ab update mode====="
-		for aDts in ${KERNEL_DEVICETREE}; do
-			if [ $KERNEL_A32_SUPPORT ]; then
-				sed -i 's/^#include \"partition_.*/#include "partition_mbox_normal_dynamic_ab.dtsi"/' ${KERNEL_DIR}/arch/arm/boot/dts/amlogic/$aDts.dts;
-			else
-				sed -i 's/^#include \"partition_.*/#include "partition_mbox_normal_dynamic_ab.dtsi"/' ${KERNEL_DIR}/arch/arm64/boot/dts/amlogic/$aDts.dts;
-			fi
-		done
-	else
-		echo "=====normal mode====="
-		for aDts in ${KERNEL_DEVICETREE}; do
-			if [ $KERNEL_A32_SUPPORT ]; then
-				sed -i 's/^#include \"partition_.*/#include "partition_mbox_normal_dynamic.dtsi"/' ${KERNEL_DIR}/arch/arm/boot/dts/amlogic/$aDts.dts;
-			else
-				sed -i 's/^#include \"partition_.*/#include "partition_mbox_normal_dynamic.dtsi"/' ${KERNEL_DIR}/arch/arm64/boot/dts/amlogic/$aDts.dts;
-			fi
-		done
-	fi
-	echo "================================="
-
-	cd ${MAIN_FOLDER}
-	./project/build/build_kernel_4.9.sh
-}
-
-function build_common_5.4() {
-	if [ $KERNEL_A32_SUPPORT ]; then
-		echo "------project/${device_project}/$1/build.config.meson.arm.trunk-----"
-	else
-		echo "------project/${device_project}/$1/build.config.meson.arm64.trunk-----"
-	fi
-
-	cd ${MAIN_FOLDER}
-	if [ $KERNEL_A32_SUPPORT ]; then
-		export BUILD_CONFIG=project/${device_project}/$1/build.config.meson.arm.trunk
-	else
-		export BUILD_CONFIG=project/${device_project}/$1/build.config.meson.arm64.trunk
-	fi
-	export TARGET_BUILD_KERNEL_VERSION=5.4
-        export TARGET_BUILD_KERNEL_4_9=false
-	. ${MAIN_FOLDER}/${BUILD_CONFIG}
-	export $(sed -n -e 's/\([^=]\)=.*/\1/p' ${MAIN_FOLDER}/${BUILD_CONFIG})
-
-	if [ $CONFIG_KERNEL_DDR_1G ]; then
-		export KERNEL_DEVICETREE=${KERNEL_DEVICETREE_DDR_1G}
-	fi
-
-	if [ $CONFIG_KERNEL_FCC_PIP ]; then
-		export KERNEL_DEVICETREE=${KERNEL_DEVICETREE_FCC_PIP}
-		export CONFIG_KERNEL_FCC_PIP=true
-	fi
-
-	echo "KERNEL_DEVICETREE: ${KERNEL_DEVICETREE}"
-	if [ $CONFIG_NONGKI ]; then
-		echo "=====normal mode====="
-		for aDts in ${KERNEL_DEVICETREE}; do
-			if [ $KERNEL_A32_SUPPORT ]; then
-				sed -i 's/^#include \"partition_.*/#include "partition_mbox.dtsi"/' ${KERNEL_DIR}/arch/arm/boot/dts/amlogic/$aDts.dts;
-			else
-				sed -i 's/^#include \"partition_.*/#include "partition_mbox.dtsi"/' ${KERNEL_DIR}/arch/arm64/boot/dts/amlogic/$aDts.dts;
-			fi
-		done
-	else
-		echo "=====ab update & vendor boot mode====="
-		for aDts in ${KERNEL_DEVICETREE}; do
-			if [ $KERNEL_A32_SUPPORT ]; then
-				sed -i 's/^#include \"partition_.*/#include "partition_mbox_ab.dtsi"/' ${KERNEL_DIR}/arch/arm/boot/dts/amlogic/$aDts.dts;
-			else
-				sed -i 's/^#include \"partition_.*/#include "partition_mbox_ab.dtsi"/' ${KERNEL_DIR}/arch/arm64/boot/dts/amlogic/$aDts.dts;
-			fi
-		done
-	fi
-	echo "================================="
-
-	cd ${MAIN_FOLDER}
-	./project/build/build.sh
 }
 
 function build_config_to_bzl() {
@@ -248,9 +152,6 @@ function build_common_5.15() {
 	export BOARD_MANUFACTURER=${device_project}
 	export PROJECT_CONFIG_DIR=project/${BOARD_MANUFACTURER}/${BOARD_DEVICENAME}
 
-	if [ ${SKIP_MRPROPER} = "true" ]; then
-		SKIP_MRPROPER=1
-	fi
 	cd ${MAIN_FOLDER}
 	local android_version='o'
 	local android_version_number=8
@@ -361,11 +262,7 @@ function build_common_5.15() {
 }
 
 function build_common() {
-	if [ "$CONFIG_KERNEL_VERSION" = "4.9" ]; then
-		build_common_4.9 $@
-	elif [ "$CONFIG_KERNEL_VERSION" = "5.4" ]; then
-		build_common_5.4 $@
-	elif [[ "$CONFIG_KERNEL_VERSION" =~ "5.15" ]]; then
+	if [[ "$CONFIG_KERNEL_VERSION" =~ "5.15" ]]; then
 		build_common_5.15 $@
 	fi
 }
@@ -374,33 +271,7 @@ function build() {
 	# parser
 	bin_path_parser $@
 
-	export SKIP_MRPROPER=true
-	unset SKIP_BUILD_KERNEL
-	unset BUILD_ONE_MODULES
-	unset SKIP_CP_KERNEL_HDR
-	unset BUILD_KERNEL_ONLY
-	unset SKIP_EXT_MODULES
 	export PRODUCT_DIR=$1
-
-	if [ "${CONFIG_KERNEL_VERSION}" == "" ]; then
-		if [ "$1" = "franklin" -o "$1" = "ohm" -o "$1" = "elektra" -o "$1" = "newton" ]; then
-			CONFIG_KERNEL_VERSION=4.9
-			echo "CONFIG_KERNEL_VERSION: ${CONFIG_KERNEL_VERSION}"
-		else
-			CONFIG_KERNEL_VERSION=5.4
-		fi
-	fi
-
-	if [ "${CONFIG_ONE_MODULES}" != "" ]; then
-		export SKIP_BUILD_KERNEL=true
-		export BUILD_ONE_MODULES=${CONFIG_ONE_MODULES}
-		export SKIP_CP_KERNEL_HDR=true
-	fi
-
-	if [ "${CONFIG_KERNEL_ONLY}" != "" ]; then
-		export SKIP_EXT_MODULES=true
-	fi
-
 
 	device_project=`find project -name ${1}`
 	if [[ -n ${device_project} ]]; then
@@ -416,80 +287,6 @@ function build() {
 		echo "build kernel error"
 		exit 1
 	fi
-
-	if [ "$CONFIG_KERNEL_VERSION" = "4.9" ]; then
-		KERNEL_OFFSET=0x1080000
-		BOOT_HEADER_VERSION=2
-		if [ $CONFIG_AB_UPDATE ]; then
-			BOOT_IMGSIZE=25165824
-		else
-			BOOT_IMGSIZE=16777216
-		fi
-	else
-		KERNEL_OFFSET=0x2080000
-		BOOT_IMGSIZE=67108864
-		BOOT_HEADER_VERSION=4
-	fi
-
-	if [ "$1" = "ohm" -o "$1" = "ohmcas" -o "$1" = "oppen" \
-		-o "$1" = "smith" -o "$1" = "calla" -o "$1" = "oppencas" -o "$1" = "planck" ]; then
-		if [ "$CONFIG_KERNEL_VERSION" = "4.9" ]; then
-			BOOT_DEVICES="androidboot.boot_devices=fe08c000.emmc"
-		else
-			BOOT_DEVICES="androidboot.boot_devices=soc/fe08c000.mmc"
-		fi
-	fi
-
-	if [ "$1" = "galilei" -o "$1" = "newton" -o "$1" = "dalton" \
-		-o "$1" = "elektra" -o "$1" = "redi" -o "$1" = "franklin" ]; then
-		if [ "$CONFIG_KERNEL_VERSION" = "4.9" ]; then
-			BOOT_DEVICES="androidboot.boot_devices=ffe07000.emmc"
-		else
-			BOOT_DEVICES="androidboot.boot_devices=soc/ffe07000.mmc"
-		fi
-	fi
-
-	if [ "$1" = "ampere" ]; then
-		BOOT_DEVICES="androidboot.boot_devices=d0074000.emmc"
-	fi
-
-	if [ "${CONFIG_Ramdisk}" != "" ]; then
-		echo "CONFIG_Ramdisk: ${CONFIG_Ramdisk}"
-		if [ $KERNEL_A32_SUPPORT ]; then
-			KERNEL_FILE=project/${device_project}/$1-kernel/${CONFIG_KERNEL_VERSION}/uImage
-		else
-			KERNEL_FILE=project/${device_project}/$1-kernel/${CONFIG_KERNEL_VERSION}/Image.gz
-		fi
-		./project/build/mkbootimg --kernel ${KERNEL_FILE} \
-		--ramdisk ${CONFIG_Ramdisk} \
-		--os_version 12 --kernel_offset ${KERNEL_OFFSET} \
-		--header_version ${BOOT_HEADER_VERSION} \
-		--output out/$1_boot.img
-		./project/build/avbtool add_hash_footer --image out/$1_boot.img \
-		--partition_size ${BOOT_IMGSIZE} --partition_name boot  \
-		--prop com.android.build.boot.os_version:12
-	fi
-
-	if [ "${CONFIG_VENDOR_Ramdisk}" != "" -a "${CONFIG_RECOVERY_Ramdisk}" != "" ]; then
-		echo "CONFIG_VENDOR_Ramdisk: ${CONFIG_VENDOR_Ramdisk}"
-		echo "CONFIG_RECOVERY_Ramdisk: ${CONFIG_RECOVERY_Ramdisk}"
-		VENDOR_CMDLINE="androidboot.dynamic_partitions=true androidboot.dtbo_idx=0"
-		VENDOR_CMDLINE="$VENDOR_CMDLINE $BOOT_DEVICES"
-		VENDOR_CMDLINE="$VENDOR_CMDLINE use_uvm=1 buildvariant=userdebug"
-		echo "VENDOR_CMDLINE: $VENDOR_CMDLINE"
-
-		./project/build/mkbootimg \
-		--dtb project/${device_project}/$1-kernel/${CONFIG_KERNEL_VERSION}/$1.dtb --base 0x0 \
-		--vendor_cmdline "$VENDOR_CMDLINE" \
-		--kernel_offset ${KERNEL_OFFSET} --header_version ${BOOT_HEADER_VERSION} \
-		--vendor_ramdisk ${CONFIG_VENDOR_Ramdisk} \
-		--ramdisk_type RECOVERY --ramdisk_name recovery \
-		--vendor_ramdisk_fragment  ${CONFIG_RECOVERY_Ramdisk} \
-		--vendor_boot out/$1_vendor_boot.img
-		./project/build/avbtool add_hash_footer \
-		--image out/$1_vendor_boot.img \
-		--partition_size 25165824 --partition_name vendor_boot
-	fi
 }
 
 function usage() {
@@ -497,53 +294,33 @@ function usage() {
   Usage:
     $(basename $0) --help
 
-    kernel & modules standalone build script.
+    kernel standalone build script.
 
     you must use -v ** params
 
     command list:
-    1. build kernel & modules for 5.4 GKI:
-        ./$(basename $0) [config_name] -v 5.4
+    1. build kernel for 5.15:
+        ./$(basename $0) [config_name] -v common14-5.15
 
-    2. build kernel & modules for 5.4 normal:
-        ./$(basename $0) [config_name] -v 5.4 --nonGKI
-
-    3. build kernel & modules for 4.9 normal:
-        ./$(basename $0) [config_name] -v 4.9
-
-    4. build kernel & modules for 4.9 virtual ab:
-        ./$(basename $0) [config_name] -v 4.9 --ab
-
-    5. clean
+    2. clean
         ./$(basename $0) clean
 
-    6. build one modules only
-        ./$(basename $0) [config_name] -v 5.4 --modules module_path
+    you can use different params at the same time, example:
+    1) ./mk ohm -v common14-5.15 --gki_image	//using gki and gki modules
 
-    7. build kernel only
-        ./$(basename $0) [config_name] -v 5.4 --kernel_only
+    2) ./mk ohm -v common14-5.15 -o out_dir	//compilation result directory
+						//out_dir: absolute directory or relative "common" directory
+						//default: device/amlogic/ohm-kernel/5.15 device/amlogic/ohm-kernel/32/5.15
 
-    8. build kernel with different config
-        ./$(basename $0) [config_name] -t [userdebug|user|eng]
+    3) ./mk ohm -v common14-5.15 -t user	//only for androidR+kernel5.15
 
-    you can use different params at the same time
+    4) ./mk ohm -v common14-5.15 --kasan	//build with kasan
 
-    Example:
-    1) ./mk newton -v 5.4 //5.4 GKI
+    4) ./mk planck -v common14-5.15 --kernel32	//compile 32-bit kernel, default to 64-bit kernel
 
-    2) ./mk newton -v 5.4 --nonGKI   //5.4 nonGKI
+    5) ./mk ohm -v common14-5.15 --sp xxx	//parameters(xxx) after --sp is used for script ./mk.sh
 
-    2) ./mk franklin -v 4.9   //4.9 normal
-
-    3) ./mk clean
-
-    4) ./mk newton -v 5.4 -t user   //5.4 GKI with additional meson64_a64_r_user_diffconfig
-
-    5) ./mk franklin -v 4.9 --ab    //4.9 virtual_ab
-
-    6) ./mk ohm -v 5.4 --modules hardware/amlogic/media_modules
-
-    7) ./mk ohm -v 5.4 --kernel_only
+    6) ./mk ohmcas -v common14-5.15 --fccpip    //for fccpip project
 
 EOF
   exit 1
@@ -615,14 +392,8 @@ function bin_path_parser() {
 				CONFIG_KERNEL_VERSION="${argv[$i]}"
 				echo "CONFIG_KERNEL_VERSION: ${CONFIG_KERNEL_VERSION}"
 				continue ;;
-			--ab|--ab_update)
-				CONFIG_AB_UPDATE=true
-				continue ;;
 			--fccpip)
 				CONFIG_KERNEL_FCC_PIP=true
-				continue ;;
-			--nonGKI)
-				CONFIG_NONGKI=true
 				continue ;;
 			--kasan)
 				KASAN_ENABLED=true
@@ -632,41 +403,15 @@ function bin_path_parser() {
 					export CONFIG_REPLACE_GKI_IMAGE=true
 				fi
 				continue ;;
-			--upgrade)
-				UPGRADE_PROJECT="${argv[$i]}"
-				continue ;;
-			--modules)
-				CONFIG_ONE_MODULES="${argv[$i]}"
-				continue ;;
-			--kernel_only)
-				CONFIG_KERNEL_ONLY=true
-				continue ;;
 			--kernel32)
 				export KERNEL_A32_SUPPORT=true
-				continue ;;
-			--ramdisk)
-				CONFIG_Ramdisk="${argv[$i]}"
-				continue ;;
-			--vendor_ramdisk)
-				CONFIG_VENDOR_Ramdisk="${argv[$i]}"
-				continue ;;
-			--recovery_ramdisk)
-				CONFIG_RECOVERY_Ramdisk="${argv[$i]}"
 				continue ;;
 			-o)
 				ANDROID_OUT_DIR="${argv[$i]}"
 				mkdir -p ${ANDROID_OUT_DIR}
 				ANDROID_OUT_DIR=$(realpath ${ANDROID_OUT_DIR})
 				continue ;;
-			--1g)
-				export CONFIG_KERNEL_DDR_1G=true
-				continue ;;
-			--builtin_modules)
-				CONFIG_BUILTIN_MODULES=true
-				echo "CONFIG_BUILTIN_MODULES: true"
-				export CONFIG_BUILTIN_MODULES
-				continue ;;
-				*)
+			*)
 		esac
 	done
 }
