@@ -65,15 +65,15 @@ function build_config_to_bzl() {
 	echo "]" 					>> ${PROJECT_DIR}/project.bzl
 
 	echo                                            >> ${PROJECT_DIR}/project.bzl
-	echo "VENDOR_MODULES_REMOVE = [" 		>> ${PROJECT_DIR}/project.bzl
-	for module in ${VENDOR_MODULES_REMOVE}; do
+	echo "MODULES_OUT_REMOVE = ["	 		>> ${PROJECT_DIR}/project.bzl
+	for module in ${MODULES_OUT_REMOVE}; do
 		echo "    \"${module}\","		>> ${PROJECT_DIR}/project.bzl
 	done
 	echo "]"					>> ${PROJECT_DIR}/project.bzl
 
 	echo 						>> ${PROJECT_DIR}/project.bzl
-	echo "VENDOR_MODULES_ADD = [" 			>> ${PROJECT_DIR}/project.bzl
-	for module in ${VENDOR_MODULES_ADD}; do
+	echo "MODULES_OUT_ADD = [" 			>> ${PROJECT_DIR}/project.bzl
+	for module in ${MODULES_OUT_ADD}; do
 		echo "    \"${module}\","		>> ${PROJECT_DIR}/project.bzl
 	done
 	echo "]"					>> ${PROJECT_DIR}/project.bzl
