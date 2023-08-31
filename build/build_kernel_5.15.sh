@@ -142,10 +142,6 @@ fi
 echo "copy dtb"
 cp ${DIST_DIR}/dtbo.img ${DEVICE_KERNEL_DIR}/
 
-if [ $CONFIG_KERNEL_FCC_PIP ]; then
-	export KERNEL_DEVICETREE=${KERNEL_DEVICETREE_FCC_PIP}
-fi
-
 DTBTOOL_DIR=project/build
 dtb_files_count=0
 mkdir -p ${OUT_AMLOGIC_DIR}/dtb
@@ -154,25 +150,25 @@ for dtb_file in ${KERNEL_DEVICETREE}; do
 	dtb_files_count=`expr ${dtb_files_count} + 1`
 done
 if [[ ${dtb_files_count} == 1 ]]; then
-	if [ $CONFIG_KERNEL_FCC_PIP ]; then
-		if [[ ${BOARD_DEVICENAME} == *"ohm"* ]]; then
-			cp -f ${DIST_DIR}/${KERNEL_DEVICETREE}.dtb ${DEVICE_KERNEL_DIR}/ohm_mxl258c.dtb
-		elif [[ ${BOARD_DEVICENAME} == *"oppencas"* ]]; then
-			cp -f ${DIST_DIR}/${KERNEL_DEVICETREE}.dtb ${DEVICE_KERNEL_DIR}/oppencas_mxl258c.dtb
-		elif [[ ${BOARD_DEVICENAME} == *"oppen"* ]]; then
-			cp -f ${DIST_DIR}/${KERNEL_DEVICETREE}.dtb ${DEVICE_KERNEL_DIR}/oppen_mxl258c.dtb
-		else
-			cp -f ${DIST_DIR}/${KERNEL_DEVICETREE}.dtb ${DEVICE_KERNEL_DIR}/${BOARD_DEVICENAME}.dtb
-		fi
+	if [[ ${KERNEL_DEVICETREE} == "adt4_1k_ui" ]]; then
+		cp ${DIST_DIR}/${KERNEL_DEVICETREE}.dtb ${DEVICE_KERNEL_DIR}/${KERNEL_DEVICETREE}.dtb
 	else
-		if [[ ${KERNEL_DEVICETREE} == "adt4_1k_ui" ]]; then
-			cp ${DIST_DIR}/${KERNEL_DEVICETREE}.dtb ${DEVICE_KERNEL_DIR}/${KERNEL_DEVICETREE}.dtb
-		else
-			cp ${DIST_DIR}/${KERNEL_DEVICETREE}.dtb ${DEVICE_KERNEL_DIR}/${BOARD_DEVICENAME}.dtb
-		fi
+		cp ${DIST_DIR}/${KERNEL_DEVICETREE}.dtb ${DEVICE_KERNEL_DIR}/${BOARD_DEVICENAME}.dtb
 	fi
 else
 	${DTBTOOL_DIR}/dtbTool -o ${DEVICE_KERNEL_DIR}/${BOARD_DEVICENAME}.dtb -p ${DTBTOOL_DIR}/ ${OUT_AMLOGIC_DIR}/dtb/
+fi
+
+fcc_dtb_files_count=0
+mkdir -p ${OUT_AMLOGIC_DIR}/fcc_dtb
+for dtb_file in ${KERNEL_DEVICETREE_FCC_PIP}; do
+	cp ${DIST_DIR}/${dtb_file}.dtb ${OUT_AMLOGIC_DIR}/fcc_dtb/
+	fcc_dtb_files_count=`expr ${fcc_dtb_files_count} + 1`
+done
+if [[ ${fcc_dtb_files_count} == 1 ]]; then
+	cp -f ${DIST_DIR}/${KERNEL_DEVICETREE_FCC_PIP}.dtb ${DEVICE_KERNEL_DIR}/${BOARD_DEVICENAME}_mxl258c.dtb
+elif [[ ${fcc_dtb_files_count} != 0 ]]; then
+	${DTBTOOL_DIR}/dtbTool -o ${DEVICE_KERNEL_DIR}/${BOARD_DEVICENAME}_mxl258c.dtb -p ${DTBTOOL_DIR}/ ${OUT_AMLOGIC_DIR}/fcc_dtb/
 fi
 
 rm -f ${KERNEL_BUILD_VAR_FILE}

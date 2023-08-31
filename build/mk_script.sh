@@ -182,11 +182,6 @@ function build_common_5.15() {
 
 	export $(sed -n -e 's/\([^=]\)=.*/\1/p' ${MAIN_FOLDER}/${BUILD_CONFIG_ANDROID})
 
-	if [ $CONFIG_KERNEL_FCC_PIP ]; then
-		export KERNEL_DEVICETREE=${KERNEL_DEVICETREE_FCC_PIP}
-		export CONFIG_KERNEL_FCC_PIP=true
-	fi
-
 	EXT_MODULES_ANDROID="${EXT_MODULES_ANDROID} ${EXT_MODULES_ANDROID_AUTO_LOAD}"
 	local common_drivers=${KERNEL_REPO}/${KERNEL_DIR}/${COMMON_DRIVERS_DIR}
 	PROJECT_DIR=${common_drivers}/project
@@ -320,8 +315,6 @@ function usage() {
 
     5) ./mk ohm -v common14-5.15 --sp xxx	//parameters(xxx) after --sp is used for script ./mk.sh
 
-    6) ./mk ohmcas -v common14-5.15 --fccpip    //for fccpip project
-
 EOF
   exit 1
 }
@@ -391,9 +384,6 @@ function bin_path_parser() {
 			-v)
 				CONFIG_KERNEL_VERSION="${argv[$i]}"
 				echo "CONFIG_KERNEL_VERSION: ${CONFIG_KERNEL_VERSION}"
-				continue ;;
-			--fccpip)
-				CONFIG_KERNEL_FCC_PIP=true
 				continue ;;
 			--kasan)
 				KASAN_ENABLED=true
