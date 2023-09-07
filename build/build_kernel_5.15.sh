@@ -120,7 +120,18 @@ else
 		cp ${gki_dir}/Image* ${DEVICE_KERNEL_DIR}/gki
 		cp ${gki_dir}/boot* ${DEVICE_KERNEL_DIR}/gki
 		cp ${gki_dir}/system_dlkm* ${DEVICE_KERNEL_DIR}/gki
-		cp ${gki_dir}/vmlinux ${DEVICE_KERNEL_DIR}/gki
+		cp ${gki_dir}/vmlinux ${DEVICE_KERNEL_DIR}/symbols
+
+		if [ -f ${gki_dir}/unstripped_modules.tar.gz ]; then
+			cp ${gki_dir}/unstripped_modules.tar.gz ${DEVICE_KERNEL_DIR}/symbols
+			(cd ${DEVICE_KERNEL_DIR}/symbols; tar -zxf unstripped_modules.tar.gz)
+			for white_module in ${GKI_MODULES_LOAD_WHITE_LIST}; do
+				if [[ -e ${DEVICE_KERNEL_DIR}/symbols/unstripped/${white_module} ]]; then
+					cp -f ${DEVICE_KERNEL_DIR}/symbols/unstripped/${white_module} ${DEVICE_KERNEL_DIR}/symbols
+				fi
+			done
+			rm -rf ${DEVICE_KERNEL_DIR}/symbols/unstripped*
+		fi
 
 		if [ -f ${DEVICE_KERNEL_DIR}/gki/system_dlkm_staging_archive.tar.gz ]; then
 			(cd ${DEVICE_KERNEL_DIR}/gki; tar -zxf system_dlkm_staging_archive.tar.gz)
