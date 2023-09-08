@@ -1,6 +1,10 @@
 KERNEL_DEVICETREE="sc2_s905x4_ah212_drm"
 KERNEL_DEVICETREE_FCC_PIP="sc2_s905x4_ah212_mxl258c_drm"
 
+GLOBAL_VARIABLE_VALUE="
+	GPU_DRV_VERSION=r44p1
+"
+
 EXT_MODULES_ANDROID="
 	//driver_modules/gpu/bifrost:gpu
 	//driver_modules/media_modules:media
@@ -8,8 +12,6 @@ EXT_MODULES_ANDROID="
 	//driver_modules/wifi_bt/wifi:wlan
 	//driver_modules/wifi_bt/bt:bt
 "
-
-GPU_DRV_VERSION=r44p1
 
 EXT_MODULES_ANDROID_AUTO_LOAD="
 "

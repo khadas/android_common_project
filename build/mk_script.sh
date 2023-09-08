@@ -93,7 +93,10 @@ function build_config_to_build_config() {
 	fi
 
 	echo "PRODUCT_DIR=${BOARD_DEVICENAME}" 		>> ${PROJECT_DIR}/build.config.project
-	[[ -n ${GPU_DRV_VERSION} ]] && echo "GPU_DRV_VERSION=${GPU_DRV_VERSION}" >> ${PROJECT_DIR}/build.config.project
+	for variable_value in ${GLOBAL_VARIABLE_VALUE}; do
+		export ${variable_value}
+		echo "${variable_value}" >> ${PROJECT_DIR}/build.config.project
+	done
 }
 
 function build_config_to_modules_kconfig() {
@@ -197,6 +200,9 @@ function build_common_5.15() {
 			ext_modules="${MAIN_FOLDER}/${KERNEL_REPO}/${ext_module} ${ext_modules}"
 		done
 		EXT_MODULES_ANDROID=${ext_modules}
+		for variable_value in ${GLOBAL_VARIABLE_VALUE}; do
+			export ${variable_value}
+		done
 	else
 		BAZEL=1
 		build_config_to_bzl
