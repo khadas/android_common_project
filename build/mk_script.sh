@@ -308,6 +308,10 @@ function usage() {
 
     you can use different params at the same time, example:
     1) ./mk ohm -v common14-5.15 --gki_image	//using gki and gki modules
+						//d/D, use daily build gki_image
+						//r/R, use release build gki_image
+						//build ID, such as 10739172
+						//default: use release build gki_image
 
     2) ./mk ohm -v common14-5.15 -o out_dir	//compilation result directory
 						//out_dir: absolute directory or relative "common" directory
@@ -396,7 +400,15 @@ function bin_path_parser() {
 				continue ;;
 			--gki_image)
 				if [[ ${KASAN_ENABLED} != "true" && ! ${sub_parameters} =~ "--use_prebuilt_gki" ]]; then
-					export CONFIG_REPLACE_GKI_IMAGE=true
+					if [[ ${argv[$i]} == "d" || ${argv[$i]} == "D" || \
+					      ${argv[$i]} == "r" || ${argv[$i]} == "R" ]]; then
+						export CONFIG_REPLACE_GKI_IMAGE=${argv[$i]}
+					elif [[ -n ${argv[$i]} && "$(echo "${argv[$i]}" | sed 's/[0-9]//g')" == "" ]]; then
+						sub_parameters="${sub_parameters} --use_prebuilt_gki ${argv[$i]}"
+						sub_parameters=`echo $sub_parameters | awk '$1=$1'`
+					else
+						export CONFIG_REPLACE_GKI_IMAGE="r"
+					fi
 				fi
 				continue ;;
 			--kernel32)

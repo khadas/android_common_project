@@ -77,7 +77,7 @@ if [[ -n ${LOAD_EXT_MODULES_IN_SECOND_STAGE} ]]; then
 fi
 
 if [[ ${FULL_KERNEL_VERSION} == "common13-5.15" ]]; then
-	if [[ ${CONFIG_REPLACE_GKI_IMAGE} ]]; then
+	if [[ -n ${CONFIG_REPLACE_GKI_IMAGE} ]]; then
 		echo "copy gki image"
 		gki_dir=${KERNEL_REPO}/gki_image
 		cp ${gki_dir}/Image* ${DEVICE_KERNEL_DIR}
@@ -102,18 +102,11 @@ else
 		cp ${DIST_DIR}/Image* ${DEVICE_KERNEL_DIR}/
 	else
 		DIST_GKI_DIR=${DIST_GKI_DIR:-${DIST_DIR}}
-		touch ${DEVICE_KERNEL_DIR}/system_dlkm.modules.load
-        	cat ${DEVICE_KERNEL_DIR}/vendor_dlkm.modules.load | while read gki_module; do
-			awk "/\/${gki_module}/" ${DIST_GKI_DIR}/system_dlkm.modules.load >> ${DEVICE_KERNEL_DIR}/system_dlkm.modules.load
-		done
-		cat ${DEVICE_KERNEL_DIR}/system_dlkm.modules.load  | while read gki_module; do
-			gki_module=${gki_module##*/}
-			sed -i "/^${gki_module}/d" ${DEVICE_KERNEL_DIR}/vendor_dlkm.modules.load
-			rm ${DEVICE_KERNEL_DIR}/lib/modules/${gki_module}
-		done
 		mkdir ${DEVICE_KERNEL_DIR}/gki
-		if [[ ${CONFIG_REPLACE_GKI_IMAGE} ]]; then
-			gki_dir=${KERNEL_REPO}/gki_image
+		if [[ "${CONFIG_REPLACE_GKI_IMAGE}" == "d" || "${CONFIG_REPLACE_GKI_IMAGE}" == "D" ]]; then
+			gki_dir=${KERNEL_REPO}/gki_image/daily
+		elif [[ "${CONFIG_REPLACE_GKI_IMAGE}" == "r" || "${CONFIG_REPLACE_GKI_IMAGE}" == "R" ]]; then
+			gki_dir=${KERNEL_REPO}/gki_image/release
 		else
 			gki_dir=${DIST_GKI_DIR}
 		fi
@@ -122,31 +115,42 @@ else
 		cp ${gki_dir}/system_dlkm* ${DEVICE_KERNEL_DIR}/gki
 		cp ${gki_dir}/vmlinux ${DEVICE_KERNEL_DIR}/symbols
 
-		if [ -f ${gki_dir}/unstripped_modules.tar.gz ]; then
+		if [[ -f ${DEVICE_KERNEL_DIR}/gki/system_dlkm_staging_archive.tar.gz ]]; then
+			(cd ${DEVICE_KERNEL_DIR}/gki; tar -zxf system_dlkm_staging_archive.tar.gz)
+		else
+			echo "There is no ${DEVICE_KERNEL_DIR}/gki/system_dlkm_staging_archive.tar.gz file here, so build break!!!"
+			exit
+		fi
+		if [[ -f ${gki_dir}/unstripped_modules.tar.gz ]]; then
 			cp ${gki_dir}/unstripped_modules.tar.gz ${DEVICE_KERNEL_DIR}/symbols
 			(cd ${DEVICE_KERNEL_DIR}/symbols; tar -zxf unstripped_modules.tar.gz)
-			for white_module in ${GKI_MODULES_LOAD_WHITE_LIST}; do
-				if [[ -e ${DEVICE_KERNEL_DIR}/symbols/unstripped/${white_module} ]]; then
-					cp -f ${DEVICE_KERNEL_DIR}/symbols/unstripped/${white_module} ${DEVICE_KERNEL_DIR}/symbols
-				fi
-			done
-			rm -rf ${DEVICE_KERNEL_DIR}/symbols/unstripped*
 		fi
+		REPLACY_SYSTEM_DLKM_IMG=1
+		touch ${DEVICE_KERNEL_DIR}/system_dlkm.modules.load
+		cat ${DEVICE_KERNEL_DIR}/vendor_recovery.modules.load | while read module; do
+			if [[ `grep "/${module}" ${DIST_GKI_DIR}/system_dlkm.modules.load` ]]; then
+				gki_module=`find ${DEVICE_KERNEL_DIR}/gki -name ${module}`
+				cp ${gki_module} ${DEVICE_KERNEL_DIR}/ramdisk/lib/modules/
+				[[ -d ${DEVICE_KERNEL_DIR}/symbols/unstripped ]] && cp ${DEVICE_KERNEL_DIR}/symbols/unstripped/${module} ${DEVICE_KERNEL_DIR}/symbols/
+				REPLACY_SYSTEM_DLKM_IMG=0
+			fi
+		done
+		cat ${DEVICE_KERNEL_DIR}/vendor_dlkm.modules.load | while read module; do
+			if [[ `grep "/${module}" ${DIST_GKI_DIR}/system_dlkm.modules.load` ]]; then
+				gki_module=`grep "/${module}" ${DIST_GKI_DIR}/system_dlkm.modules.load`
+				echo "${gki_module}" >> ${DEVICE_KERNEL_DIR}/system_dlkm.modules.load
+				rm ${DEVICE_KERNEL_DIR}/lib/modules/${module}
+				[[ -d ${DEVICE_KERNEL_DIR}/symbols/unstripped ]] && cp ${DEVICE_KERNEL_DIR}/symbols/unstripped/${module} ${DEVICE_KERNEL_DIR}/symbols/
+			fi
+		done
+		[[ -d ${DEVICE_KERNEL_DIR}/symbols/unstripped ]] && rm -rf ${DEVICE_KERNEL_DIR}/symbols/unstripped
 
-		if [ -f ${DEVICE_KERNEL_DIR}/gki/system_dlkm_staging_archive.tar.gz ]; then
-			(cd ${DEVICE_KERNEL_DIR}/gki; tar -zxf system_dlkm_staging_archive.tar.gz)
-			for module in `find ${DEVICE_KERNEL_DIR}/gki -name *.ko`; do
-				module_name=${module##*/}
-				find_module=
-				for white_module in ${GKI_MODULES_LOAD_WHITE_LIST}; do
-					if [[ "${module_name}" == "${white_module}" ]]; then
-						find_module=1
-						break;
-					fi
-				done
-				[[ -z ${find_module} ]] && rm -f ${module}
-			done
-		fi
+		for module in `find ${DEVICE_KERNEL_DIR}/gki -name *.ko`; do
+			module_name=${module##*/}
+			if [[ ! `grep "^${module_name}" ${DEVICE_KERNEL_DIR}/vendor_dlkm.modules.load` ]]; then
+				rm -rf ${module}
+			fi
+		done
 	fi
 fi
 
@@ -184,6 +188,9 @@ fi
 
 rm -f ${KERNEL_BUILD_VAR_FILE}
 echo "========================================================"
+if [[ "${REPLACY_SYSTEM_DLKM_IMG}" == "0" ]]; then
+	echo "WARNING: Can't replace boot.img and system_dlkm.img for gki testing"
+fi
 echo "build end"
 echo "========================================================"
 echo
