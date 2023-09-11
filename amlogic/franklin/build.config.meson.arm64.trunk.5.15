@@ -1,0 +1,50 @@
+KERNEL_DEVICETREE="g12a_s905x2_u212"
+
+GLOBAL_VARIABLE_VALUE="
+	GPU_DRV_VERSION=r44p1
+"
+
+EXT_MODULES_ANDROID="
+	//driver_modules/gpu/bifrost:gpu
+	//driver_modules/media_modules:media
+	//driver_modules/wifi_bt/wifi:wlan
+	//driver_modules/wifi_bt/bt:bt
+"
+
+EXT_MODULES_ANDROID_AUTO_LOAD="
+"
+
+KCONFIG_EXT_ANDOIRD="
+"
+
+FIRMWARES_COPY_FROM_TO="
+	driver_modules/media_modules/firmware:video
+"
+
+TYPE_MODULE_SELECT_MODULE_ANDROID="
+	amlogic-clk-soc-* 1 amlogic-clk-soc-sm1.ko
+	amlogic-pinctrl-soc-* 1 amlogic-pinctrl-soc-sm1.ko
+	amlogic-snd-codec-* 2 amlogic-snd-codec-dummy.ko amlogic-snd-codec-t9015.ko
+"
+
+MODULES_OUT_REMOVE="
+"
+
+MODULES_OUT_ADD="
+"
+
+MODULES_LOAD_BLACK_LIST="
+"
+
+MODULES_SERVICE_LOAD_LIST="
+"
+
+EXTRA_GKI_MODULES_LIST="
+"
+
+MODULES_SEQUENCE_LIST=
+
+DEV_CONFIGS="
+"
+
+UPGRADE_PROJECT=u
