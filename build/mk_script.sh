@@ -248,6 +248,26 @@ function build_common_5.15() {
 		fi
 	fi
 
+	if [[ ${KASAN_ENABLED} != "true" && ! ${sub_parameters} =~ "--use_prebuilt_gki" ]]; then
+		if [[ "${CONFIG_REPLACE_GKI_IMAGE}" == "d" || "${CONFIG_REPLACE_GKI_IMAGE}" == "D" || \
+			"${CONFIG_REPLACE_GKI_IMAGE}" == "r" || "${CONFIG_REPLACE_GKI_IMAGE}" == "R" ]]; then
+			export CONFIG_REPLACE_GKI_IMAGE=${CONFIG_REPLACE_GKI_IMAGE}
+		elif [[ -n ${CONFIG_REPLACE_GKI_IMAGE} && "$(echo "${CONFIG_REPLACE_GKI_IMAGE}" | sed 's/[0-9]//g')" == "" ]]; then
+			sub_parameters="${sub_parameters} --use_prebuilt_gki ${CONFIG_REPLACE_GKI_IMAGE}"
+			sub_parameters=`echo $sub_parameters | awk '$1=$1'`
+		elif [[ "${CONFIG_REPLACE_GKI_IMAGE}" == "n" || ${CONFIG_REPLACE_GKI_IMAGE} == "N" ]]; then
+			export CONFIG_REPLACE_GKI_IMAGE=
+		else
+			if [[ "${GKI_CONFIG}" == "gki_20" ]]; then
+				export CONFIG_REPLACE_GKI_IMAGE="r"
+			else
+				export CONFIG_REPLACE_GKI_IMAGE=
+			fi
+		fi
+	else
+		export CONFIG_REPLACE_GKI_IMAGE=
+	fi
+
 	[[ "${KERNEL_A32_SUPPORT}" == "true" ]] && sub_parameters="$sub_parameters --arch arm"
 	if [[ -n ${UPGRADE_PROJECT} ]]; then
 		ANDROID_VERSION=${UPGRADE_PROJECT}
@@ -307,11 +327,11 @@ function usage() {
         ./$(basename $0) clean
 
     you can use different params at the same time, example:
-    1) ./mk ohm -v common14-5.15 --gki_image	//using gki and gki modules
+    1) ./mk ohm -v common14-5.15 --gki_image	//using gki and gki modules(for gki2.0 and gki1.0 project)
 						//d/D, use daily build gki_image
-						//r/R, use release build gki_image
+						//r/R, use release build gki_image(default for gki2.0 project)
+						//n/N, use locally build gki_image(default for gki1.0 project)
 						//build ID, such as 10739172
-						//default: use release build gki_image
 
     2) ./mk ohm -v common14-5.15 -o out_dir	//compilation result directory
 						//out_dir: absolute directory or relative "common" directory
@@ -399,17 +419,7 @@ function bin_path_parser() {
 				KASAN_ENABLED=true
 				continue ;;
 			--gki_image)
-				if [[ ${KASAN_ENABLED} != "true" && ! ${sub_parameters} =~ "--use_prebuilt_gki" ]]; then
-					if [[ ${argv[$i]} == "d" || ${argv[$i]} == "D" || \
-					      ${argv[$i]} == "r" || ${argv[$i]} == "R" ]]; then
-						export CONFIG_REPLACE_GKI_IMAGE=${argv[$i]}
-					elif [[ -n ${argv[$i]} && "$(echo "${argv[$i]}" | sed 's/[0-9]//g')" == "" ]]; then
-						sub_parameters="${sub_parameters} --use_prebuilt_gki ${argv[$i]}"
-						sub_parameters=`echo $sub_parameters | awk '$1=$1'`
-					else
-						export CONFIG_REPLACE_GKI_IMAGE="r"
-					fi
-				fi
+				export CONFIG_REPLACE_GKI_IMAGE=${argv[$i]}
 				continue ;;
 			--kernel32)
 				export KERNEL_A32_SUPPORT=true
