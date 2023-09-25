@@ -110,7 +110,7 @@ function build_config_to_modules_kconfig() {
 		echo "    \"${COMMON_DRIVERS_DIR}/Kconfig.ext\","	>> ${PROJECT_DIR}/project.bzl
 		echo "    \"${COMMON_DRIVERS_DIR}/project/Kconfig.ext_modules\","	>> ${PROJECT_DIR}/project.bzl
 	fi
-	for kconfig in ${KCONFIG_EXT_ANDOIRD}; do
+	for kconfig in ${KCONFIG_EXT_ANDROID}; do
 		if [[ ${BAZEL} == 1 ]]; then
 			echo "    \"${kconfig}\","		>> ${PROJECT_DIR}/project.bzl
 		fi
