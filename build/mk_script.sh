@@ -20,30 +20,19 @@ function copy_out() {
 		echo "copy kernel to incoming android out dir"
 		rm -rf ${ANDROID_OUT_DIR}/*
 		cp -a ${SRC_PATH}/* ${ANDROID_OUT_DIR}/
-	else
+	elif [[ -d ${MAIN_FOLDER}/../system/core && -d  ${MAIN_FOLDER}/../frameworks/base && -d ${MAIN_FOLDER}/../packages/apps ]]; then
 		ANDROID_PROJECT_PATH=device/${BOARD_MANUFACTURER}/${BOARD_DEVICENAME}-kernel
 		if [ $KERNEL_A32_SUPPORT ]; then
-			if [[ -d ${MAIN_FOLDER}/../${ANDROID_PROJECT_PATH} ]]; then
-				DST_PATH=${MAIN_FOLDER}/../${ANDROID_PROJECT_PATH}/32/${KERNEL_VERSION}
-			elif [[ -d ${MAIN_FOLDER}/${ANDROID_PROJECT_PATH} ]]; then
-				DST_PATH=${MAIN_FOLDER}/${ANDROID_PROJECT_PATH}/32/${KERNEL_VERSION}
-			fi
+			DST_PATH=${MAIN_FOLDER}/../${ANDROID_PROJECT_PATH}/32/${KERNEL_VERSION}
 		else
-			if [[ -d ${MAIN_FOLDER}/../${ANDROID_PROJECT_PATH} ]]; then
-				DST_PATH=${MAIN_FOLDER}/../${ANDROID_PROJECT_PATH}/${KERNEL_VERSION}
-			elif [[ -d ${MAIN_FOLDER}/${ANDROID_PROJECT_PATH} ]]; then
-				DST_PATH=${MAIN_FOLDER}/${ANDROID_PROJECT_PATH}/${KERNEL_VERSION}
-			fi
+			DST_PATH=${MAIN_FOLDER}/../${ANDROID_PROJECT_PATH}/${KERNEL_VERSION}
 
 		fi
-		if [[ -d ${MAIN_FOLDER}/../${ANDROID_PROJECT_PATH} || -d ${MAIN_FOLDER}/${ANDROID_PROJECT_PATH} ]]; then
-			mkdir -p ${DST_PATH}
-			DST_PATH=`realpath ${DST_PATH}`
-			echo "copy kernel to ${DST_PATH}"
-			rm -rf ${DST_PATH}/*
-			pwd
-			cp -a ${SRC_PATH}/* ${DST_PATH}/
-		fi
+		mkdir -p ${DST_PATH}
+		DST_PATH=`realpath ${DST_PATH}`
+		echo "copy kernel to ${DST_PATH}"
+		rm -rf ${DST_PATH}/*
+		cp -a ${SRC_PATH}/* ${DST_PATH}/
 	fi
 }
 
@@ -174,6 +163,7 @@ function build_common_5.15() {
 		ARCH=arm64
 		BUILD_CONFIG_ANDROID=${PROJECT_CONFIG_DIR}/build.config.meson.arm64.trunk.5.15
 	fi
+	[[ -n ${CONFIG_REPLACE_GKI_IMAGE} ]] && CMDLINE_REPLACE_GKI_IMAGE=${CONFIG_REPLACE_GKI_IMAGE}
 	. ${MAIN_FOLDER}/${BUILD_CONFIG_ANDROID}
 
 	local prebuilt_modules_path
@@ -248,6 +238,7 @@ function build_common_5.15() {
 		fi
 	fi
 
+	[[ -n ${CMDLINE_REPLACE_GKI_IMAGE} ]] && CONFIG_REPLACE_GKI_IMAGE=${CMDLINE_REPLACE_GKI_IMAGE}
 	if [[ ${KASAN_ENABLED} != "true" && ! ${sub_parameters} =~ "--use_prebuilt_gki" ]]; then
 		if [[ "${CONFIG_REPLACE_GKI_IMAGE}" == "d" || "${CONFIG_REPLACE_GKI_IMAGE}" == "D" || \
 			"${CONFIG_REPLACE_GKI_IMAGE}" == "r" || "${CONFIG_REPLACE_GKI_IMAGE}" == "R" ]]; then

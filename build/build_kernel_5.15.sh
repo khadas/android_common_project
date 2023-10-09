@@ -31,11 +31,11 @@ cp -rf ${OUT_AMLOGIC_DIR}/symbols ${DEVICE_KERNEL_DIR}/symbols
 
 echo "copy ramdisk module ko"
 mkdir -p ${DEVICE_KERNEL_DIR}/ramdisk/lib/modules/
-if [ -s ${OUT_AMLOGIC_DIR}/modules/ramdisk/ramdisk_modules.order ]; then
+if [[ -s ${OUT_AMLOGIC_DIR}/modules/ramdisk/ramdisk_modules.order ]]; then
 	cp ${OUT_AMLOGIC_DIR}/modules/ramdisk/*.ko ${DEVICE_KERNEL_DIR}/ramdisk/lib/modules/
 fi
 
-if [ -s ${OUT_AMLOGIC_DIR}/modules/recovery/recovery_modules.order ]; then
+if [[ -s ${OUT_AMLOGIC_DIR}/modules/recovery/recovery_modules.order ]]; then
 	cp ${OUT_AMLOGIC_DIR}/modules/recovery/*.ko ${DEVICE_KERNEL_DIR}/ramdisk/lib/modules/
 fi
 
@@ -55,8 +55,12 @@ for src_dst in ${FIRMWARES_COPY_FROM_TO}; do
 done
 
 echo "copy vendor_dlkm module ko"
-cp -a ${OUT_AMLOGIC_DIR}/modules/vendor/*.ko ${DEVICE_KERNEL_DIR}/lib/modules/
-cp -a ${OUT_AMLOGIC_DIR}/ext_modules/*.ko ${DEVICE_KERNEL_DIR}/lib/modules/
+if [[ -s ${OUT_AMLOGIC_DIR}/modules/vendor/vendor_modules.order ]]; then
+	cp -a ${OUT_AMLOGIC_DIR}/modules/vendor/*.ko ${DEVICE_KERNEL_DIR}/lib/modules/
+fi
+if [[ -s ${OUT_AMLOGIC_DIR}/ext_modules/ext_modules.order ]]; then
+	cp -a ${OUT_AMLOGIC_DIR}/ext_modules/*.ko ${DEVICE_KERNEL_DIR}/lib/modules/
+fi
 
 echo "copy service_module ko"
 res=`ls ${OUT_AMLOGIC_DIR}/modules/service_module`
@@ -72,7 +76,6 @@ cp ${OUT_AMLOGIC_DIR}/modules/vendor/vendor_modules.order ${DEVICE_KERNEL_DIR}/v
 
 echo "copy ext modules ko"
 if [[ -n ${LOAD_EXT_MODULES_IN_SECOND_STAGE} ]]; then
-	cp ${OUT_AMLOGIC_DIR}/ext_modules/*.ko ${DEVICE_KERNEL_DIR}/lib/modules/
 	cat ${OUT_AMLOGIC_DIR}/ext_modules/ext_modules.order >> ${DEVICE_KERNEL_DIR}/vendor_dlkm.modules.load
 fi
 
