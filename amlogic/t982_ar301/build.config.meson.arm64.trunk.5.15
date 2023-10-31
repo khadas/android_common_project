@@ -8,6 +8,7 @@ EXT_MODULES_ANDROID="
 	//driver_modules/media_modules:media
 	//driver_modules/wifi_bt/wifi:wlan
 	//driver_modules/wifi_bt/bt:bt
+	//driver_modules/npu/driver:npu
 "
 
 GLOBAL_VARIABLE_VALUE="
