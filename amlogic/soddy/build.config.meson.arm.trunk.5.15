@@ -1,4 +1,4 @@
-KERNEL_DEVICETREE="t5d_t950d4_am301_1.5g t5d_t950x4_am311_1.5g t5d_t950x4_am311_1g t5d_t950d4_am301_1g"
+KERNEL_DEVICETREE="t5w_t962d4_at301 t5w_t962d4_at301_1g t5w_t962d4_at301_1.5g"
 
 
 GLOBAL_VARIABLE_VALUE="
@@ -26,8 +26,8 @@ FIRMWARES_COPY_FROM_TO="
 	driver_modules/media_modules/firmware:video
 "
 TYPE_MODULE_SELECT_MODULE_ANDROID="
-	amlogic-clk-soc-* 1 amlogic-clk-soc-t5d.ko
-	amlogic-pinctrl-soc-* 1 amlogic-pinctrl-soc-t5d.ko
+	amlogic-clk-soc-* 1 amlogic-clk-soc-t5w.ko
+	amlogic-pinctrl-soc-* 1 amlogic-pinctrl-soc-t5w.ko
 	amlogic-snd-codec-* 3 amlogic-snd-codec-dummy.ko amlogic-snd-codec-tas5805.ko amlogic-snd-codec-tl1.ko
 "
 
