@@ -50,5 +50,5 @@ EXTRA_GKI_MODULES_LIST="
 MODULES_SEQUENCE_LIST=
 
 DEV_CONFIGS="
-	mercury_defconfig
+	amlogic_mercury.defconfig
 "
