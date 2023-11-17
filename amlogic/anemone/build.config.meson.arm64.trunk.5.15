@@ -1,4 +1,4 @@
-KERNEL_DEVICETREE="t3x_reva_t968d4_bc302 t3x_reva_t968d4_bc309 t3x_t968d4_bc302 t3x_t968d4_bc309"
+KERNEL_DEVICETREE="t3x_reva_t968d4_bc302 t3x_reva_t968d4_bc309 t3x_t968d4_bc302 t3x_t968d4_bc309 t3x_t968d4_bc302_multidisplay"
 DTBO_DEVICETREE=android_overlay_dt
 PRODUCT_DIRNAME=device/amlogic/anemone
 BOARD_DEVICENAME=anemone
