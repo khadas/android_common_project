@@ -106,7 +106,9 @@ else
 	else
 		DIST_GKI_DIR=${DIST_GKI_DIR:-${DIST_DIR}}
 		mkdir ${DEVICE_KERNEL_DIR}/gki
-		if [[ "${CONFIG_REPLACE_GKI_IMAGE}" == "d" || "${CONFIG_REPLACE_GKI_IMAGE}" == "D" ]]; then
+		if [[ ! -d ${KERNEL_REPO}/gki_image ]]; then
+			gki_dir=${DIST_GKI_DIR}
+		elif [[ "${CONFIG_REPLACE_GKI_IMAGE}" == "d" || "${CONFIG_REPLACE_GKI_IMAGE}" == "D" ]]; then
 			gki_dir=${KERNEL_REPO}/gki_image/daily
 		elif [[ "${CONFIG_REPLACE_GKI_IMAGE}" == "r" || "${CONFIG_REPLACE_GKI_IMAGE}" == "R" ]]; then
 			gki_dir=${KERNEL_REPO}/gki_image/release
