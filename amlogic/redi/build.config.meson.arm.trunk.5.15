@@ -18,10 +18,6 @@ EXT_MODULES_ANDROID_AUTO_LOAD="
 KCONFIG_EXT_ANDROID="
 "
 
-MODULES_LOAD_BLACK_LIST="
-        amlogic-dvb-demux.ko
-"
-
 FIRMWARES_COPY_FROM_TO="
 	driver_modules/media_modules/firmware:video
 "
@@ -38,6 +34,7 @@ MODULES_OUT_ADD="
 "
 
 MODULES_LOAD_BLACK_LIST="
+        amlogic-dvb-demux.ko
 "
 
 MODULES_SERVICE_LOAD_LIST="
@@ -50,4 +47,3 @@ MODULES_SEQUENCE_LIST=
 
 DEV_CONFIGS="
 "
-
