@@ -25,7 +25,8 @@ FIRMWARES_COPY_FROM_TO="
 TYPE_MODULE_SELECT_MODULE_ANDROID="
 	amlogic-clk-soc-* 1 amlogic-clk-soc-txhd2.ko
 	amlogic-pinctrl-soc-* 1 amlogic-pinctrl-soc-txhd2.ko
-	amlogic-snd-codec-* 3 amlogic-snd-codec-dummy.ko amlogic-snd-codec-tas5805.ko amlogic-snd-codec-tl1.ko
+	amlogic-aoclk-soc-* 1 amlogic-aoclk-soc-txhd2.ko
+	amlogic-snd-codec-* 2 amlogic-snd-codec-dummy.ko amlogic-snd-codec-tl1.ko
 "
 
 MODULES_OUT_REMOVE="
@@ -36,6 +37,15 @@ MODULES_OUT_ADD="
 
 MODULES_LOAD_BLACK_LIST="
 	amlogic-dvb-demux.ko
+	amlogic-jtag.ko
+	amlogic-irblaster.ko
+	amlogic-host.ko
+	amlogic-crypto-dma.ko
+	dwc_otg.ko
+	amlogic-usb-cam.ko
+	amlogic_pcie_v2_host.ko
+	amlogic-fs-yaffs.ko
+	ntfs3.ko
 "
 
 MODULES_SERVICE_LOAD_LIST="
@@ -47,6 +57,7 @@ EXTRA_GKI_MODULES_LIST="
 MODULES_SEQUENCE_LIST=
 
 DEV_CONFIGS="
+	t950s_be311_u_common14-5.15_devconfig
 "
 
 GKI_CONFIG=gki_10
