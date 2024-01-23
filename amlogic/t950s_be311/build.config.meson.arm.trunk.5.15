@@ -1,4 +1,4 @@
-KERNEL_DEVICETREE="txhd2_t950s_be301_U txhd2_t950s_be311_U txhd2_t950s_be309_U txhd2_t950s_be319_U txhd2_t950s_be312_U"
+KERNEL_DEVICETREE="txhd2_t950s_be301_U txhd2_t950s_be311_U txhd2_t950s_be311_512m_U txhd2_t950s_be301_512m_U txhd2_t950s_be309_U txhd2_t950s_be319_U txhd2_t950s_be312_U"
 
 GLOBAL_VARIABLE_VALUE="
 	GPU_DRV_VERSION=r10p2
