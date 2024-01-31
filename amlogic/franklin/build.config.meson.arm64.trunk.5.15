@@ -75,7 +75,7 @@ EXTRA_GKI_MODULES_LIST="
 MODULES_SEQUENCE_LIST=modules_sequence_list
 
 DEV_CONFIGS="
-	g12a_fragment.defconfig
+	franklin_u_common14-5.15_devconfig
 "
 
 UPGRADE_PROJECT=u

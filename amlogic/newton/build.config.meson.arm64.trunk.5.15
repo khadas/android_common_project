@@ -74,7 +74,7 @@ EXTRA_GKI_MODULES_LIST="
 MODULES_SEQUENCE_LIST=modules_sequence_list
 
 DEV_CONFIGS="
-	sm1_fragment.defconfig
+	newton_u_common14-5.15_devconfig
 "
 
 UPGRADE_PROJECT=u
