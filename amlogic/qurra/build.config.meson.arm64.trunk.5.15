@@ -20,6 +20,10 @@ KCONFIG_EXT_ANDROID="
 
 FIRMWARES_COPY_FROM_TO="
 	driver_modules/media_modules/firmware:video
+	driver_modules/wifi_bt/wifi/amlogic/w2/common/wifi_w2_fw_pcie.bin:wifi/wifi_w2_fw_pcie.bin
+	driver_modules/wifi_bt/wifi/amlogic/w2/common/wifi_w2_fw_sdio.bin:wifi/wifi_w2_fw_sdio.bin
+	driver_modules/wifi_bt/wifi/amlogic/w2/common/wifi_w2_fw_usb.bin:wifi/wifi_w2_fw_usb.bin
+	driver_modules/wifi_bt/wifi/amlogic/w2/common/aml_wifi_rf.txt:wifi/aml_wifi_rf.txt
 "
 
 TYPE_MODULE_SELECT_MODULE_ANDROID="
