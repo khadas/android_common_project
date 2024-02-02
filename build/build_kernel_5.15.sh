@@ -136,7 +136,9 @@ else
 			if [[ `grep "/${module}" ${DIST_GKI_DIR}/system_dlkm.modules.load` ]]; then
 				gki_module=`find ${DEVICE_KERNEL_DIR}/gki -name ${module}`
 				cp ${gki_module} ${DEVICE_KERNEL_DIR}/ramdisk/lib/modules/
-				[[ -d ${DEVICE_KERNEL_DIR}/symbols/unstripped ]] && cp ${DEVICE_KERNEL_DIR}/symbols/unstripped/${module} ${DEVICE_KERNEL_DIR}/symbols/
+				if [[ -d ${DEVICE_KERNEL_DIR}/symbols/unstripped ]]; then
+					cp ${DEVICE_KERNEL_DIR}/symbols/unstripped/${module} ${DEVICE_KERNEL_DIR}/symbols/
+				fi
 				REPLACY_SYSTEM_DLKM_IMG=0
 			fi
 		done
@@ -145,11 +147,14 @@ else
 				gki_module=`grep "/${module}" ${DIST_GKI_DIR}/system_dlkm.modules.load`
 				echo "${gki_module}" >> ${DEVICE_KERNEL_DIR}/system_dlkm.modules.load
 				rm ${DEVICE_KERNEL_DIR}/lib/modules/${module}
-				[[ -d ${DEVICE_KERNEL_DIR}/symbols/unstripped ]] && cp ${DEVICE_KERNEL_DIR}/symbols/unstripped/${module} ${DEVICE_KERNEL_DIR}/symbols/
+				if [[ -d ${DEVICE_KERNEL_DIR}/symbols/unstripped ]]; then
+					cp ${DEVICE_KERNEL_DIR}/symbols/unstripped/${module} ${DEVICE_KERNEL_DIR}/symbols/
+				fi
 			fi
 		done
-		[[ -d ${DEVICE_KERNEL_DIR}/symbols/unstripped ]] && rm -rf ${DEVICE_KERNEL_DIR}/symbols/unstripped
-
+		if [[ -d ${DEVICE_KERNEL_DIR}/symbols/unstripped ]]; then
+			rm -rf ${DEVICE_KERNEL_DIR}/symbols/unstripped
+		fi
 		for module in `find ${DEVICE_KERNEL_DIR}/gki -name *.ko`; do
 			module_name=${module##*/}
 			if [[ ! `grep "^${module_name}" ${DEVICE_KERNEL_DIR}/vendor_dlkm.modules.load` ]]; then
