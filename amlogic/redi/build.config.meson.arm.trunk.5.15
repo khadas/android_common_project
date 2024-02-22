@@ -38,6 +38,7 @@ MODULES_LOAD_BLACK_LIST="
 "
 
 MODULES_SERVICE_LOAD_LIST="
+        amlogic-dvb-ci.ko
 "
 
 EXTRA_GKI_MODULES_LIST="
