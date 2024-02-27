@@ -68,6 +68,12 @@ if [[ -n ${res} ]]; then
 	cp ${OUT_AMLOGIC_DIR}/modules/service_module/*.ko ${DEVICE_KERNEL_DIR}/lib/modules/
 fi
 
+echo "copy closed source modules"
+res=`ls ${OUT_AMLOGIC_DIR}/modules/extra_closed_source_modules`
+if [[ -n ${res} ]]; then
+	cp -rf ${OUT_AMLOGIC_DIR}/modules/extra_closed_source_modules ${DEVICE_KERNEL_DIR}/
+fi
+
 echo "copy modules.load"
 cp ${OUT_AMLOGIC_DIR}/modules/ramdisk/ramdisk_modules.order ${DEVICE_KERNEL_DIR}/vendor_boot.modules.load
 cp ${OUT_AMLOGIC_DIR}/modules/ramdisk/ramdisk_modules.order ${DEVICE_KERNEL_DIR}/vendor_recovery.modules.load
