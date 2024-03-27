@@ -1,0 +1,53 @@
+KERNEL_DEVICETREE="txhd2_t950s_be301_U txhd2_t950s_be311_U txhd2_t950s_be311_512m_U txhd2_t950s_be301_512m_U txhd2_t950s_be309_U txhd2_t950s_be319_U txhd2_t950s_be312_U"
+
+GLOBAL_VARIABLE_VALUE="
+	GPU_DRV_VERSION=r10p2
+"
+
+EXT_MODULES_ANDROID="
+	driver_modules/gpu/utgard
+	driver_modules/media_modules
+	driver_modules/DTVKit/AFD
+	driver_modules/wifi_bt/wifi
+	driver_modules/wifi_bt/bt
+"
+
+EXT_MODULES_ANDROID_AUTO_LOAD="
+"
+
+KCONFIG_EXT_ANDROID="
+"
+
+FIRMWARES_COPY_FROM_TO="
+	driver_modules/media_modules/firmware:video
+"
+
+TYPE_MODULE_SELECT_MODULE_ANDROID="
+	amlogic-clk-soc-* 1 amlogic-clk-soc-txhd2.ko
+	amlogic-pinctrl-soc-* 1 amlogic-pinctrl-soc-txhd2.ko
+	amlogic-aoclk-soc-* 1 amlogic-aoclk-soc-txhd2.ko
+	amlogic-snd-codec-* 2 amlogic-snd-codec-dummy.ko amlogic-snd-codec-tl1.ko
+"
+
+MODULES_OUT_REMOVE="
+"
+
+MODULES_OUT_ADD="
+"
+
+MODULES_LOAD_BLACK_LIST="
+"
+
+MODULES_SERVICE_LOAD_LIST="
+"
+
+EXTRA_GKI_MODULES_LIST="
+"
+
+MODULES_SEQUENCE_LIST=
+
+DEV_CONFIGS="
+	t950s_be311_u_common14-5.15_devconfig
+"
+
+GKI_CONFIG=gki_10
