@@ -1,4 +1,4 @@
-KERNEL_DEVICETREE="t7c_a311d2_an400_bluebell-hdmitx-only-4g"
+KERNEL_DEVICETREE="s7_s805x3_bp202"
 
 GLOBAL_VARIABLE_VALUE="
 	GPU_DRV_VERSION=r47p0
@@ -10,8 +10,6 @@ EXT_MODULES_ANDROID="
 	//driver_modules/DTVKit/AFD:afd
 	//driver_modules/wifi_bt/wifi:wlan
 	//driver_modules/wifi_bt/bt:bt
-	//driver_modules/camera/t7c_515_cam/driver:camera
-	//driver_modules/adla/driver:adla
 "
 
 EXT_MODULES_ANDROID_AUTO_LOAD="
@@ -25,9 +23,9 @@ FIRMWARES_COPY_FROM_TO="
 "
 
 TYPE_MODULE_SELECT_MODULE_ANDROID="
-	amlogic-clk-soc-* 1 amlogic-clk-soc-t7.ko
-	amlogic-pinctrl-soc-* 1 amlogic-pinctrl-soc-t7.ko
-	amlogic-snd-codec-* 3 amlogic-snd-codec-dummy.ko amlogic-snd-codec-tas5707.ko amlogic-snd-codec-tl1.ko
+	amlogic-clk-soc-* 1 amlogic-clk-soc-s7.ko
+	amlogic-pinctrl-soc-* 1 amlogic-pinctrl-soc-s7.ko
+	amlogic-snd-codec-* 2 amlogic-snd-codec-dummy.ko amlogic-snd-codec-t9015.ko
 "
 
 MODULES_OUT_REMOVE="
@@ -37,6 +35,7 @@ MODULES_OUT_ADD="
 "
 
 MODULES_LOAD_BLACK_LIST="
+	amlogic_pcie_v2_host.ko
 "
 
 MODULES_SERVICE_LOAD_LIST="

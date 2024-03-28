@@ -1,12 +1,13 @@
 KERNEL_DEVICETREE="sm1_s905x3_ac214 sm1_s905x3_ac215 sm1_s905c1_ac232"
 
 GLOBAL_VARIABLE_VALUE="
-	GPU_DRV_VERSION=r44p1
+	GPU_DRV_VERSION=r47p0
 "
 
 EXT_MODULES_ANDROID="
 	//driver_modules/gpu/bifrost:gpu
 	//driver_modules/media_modules:media
+	//driver_modules/DTVKit/AFD:afd
 	//driver_modules/wifi_bt/wifi:wlan
 	//driver_modules/wifi_bt/bt:bt
 "
@@ -74,7 +75,7 @@ EXTRA_GKI_MODULES_LIST="
 MODULES_SEQUENCE_LIST=modules_sequence_list
 
 DEV_CONFIGS="
-	sm1_fragment.defconfig
+	newton_u_common14-5.15_devconfig
 "
 
 UPGRADE_PROJECT=u

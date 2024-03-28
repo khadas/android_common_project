@@ -1,12 +1,13 @@
 KERNEL_DEVICETREE="g12a_s905x2_u212 g12a_s905x2_u215"
 
 GLOBAL_VARIABLE_VALUE="
-	GPU_DRV_VERSION=r44p1
+	GPU_DRV_VERSION=r47p0
 "
 
 EXT_MODULES_ANDROID="
 	//driver_modules/gpu/bifrost:gpu
 	//driver_modules/media_modules:media
+	//driver_modules/DTVKit/AFD:afd
 	//driver_modules/wifi_bt/wifi:wlan
 	//driver_modules/wifi_bt/bt:bt
 "
@@ -75,7 +76,7 @@ EXTRA_GKI_MODULES_LIST="
 MODULES_SEQUENCE_LIST=modules_sequence_list
 
 DEV_CONFIGS="
-	g12a_fragment.defconfig
+	franklin_u_common14-5.15_devconfig
 "
 
 UPGRADE_PROJECT=u

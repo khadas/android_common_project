@@ -82,6 +82,7 @@ function build_config_to_build_config() {
 	fi
 
 	echo "PRODUCT_DIR=${BOARD_DEVICENAME}" 		>> ${PROJECT_DIR}/build.config.project
+	echo "PRODUCT_FULL_DIR=${MAIN_FOLDER}/${PROJECT_CONFIG_DIR}"	>> ${PROJECT_DIR}/build.config.project
 	for variable_value in ${GLOBAL_VARIABLE_VALUE}; do
 		export ${variable_value}
 		echo "${variable_value}" >> ${PROJECT_DIR}/build.config.project
@@ -143,6 +144,7 @@ function build_common_5.15() {
 	export BOARD_DEVICENAME=$1
 	export BOARD_MANUFACTURER=${device_project}
 	export PROJECT_CONFIG_DIR=project/${BOARD_MANUFACTURER}/${BOARD_DEVICENAME}
+	export PRODUCT_FULL_DIR=${MAIN_FOLDER}/${PROJECT_CONFIG_DIR}
 
 	cd ${MAIN_FOLDER}
 	local android_version='o'

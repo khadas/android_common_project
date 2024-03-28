@@ -6,6 +6,7 @@ BOARD_DEVICENAME=t982_ar301
 EXT_MODULES_ANDROID="
 	//driver_modules/gpu/bifrost:gpu
 	//driver_modules/media_modules:media
+	//driver_modules/DTVKit/AFD:afd
 	//driver_modules/wifi_bt/wifi:wlan
 	//driver_modules/wifi_bt/bt:bt
 	//driver_modules/npu/driver:npu
