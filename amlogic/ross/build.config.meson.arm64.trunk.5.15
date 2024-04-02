@@ -23,8 +23,8 @@ FIRMWARES_COPY_FROM_TO="
 "
 
 TYPE_MODULE_SELECT_MODULE_ANDROID="
-	amlogic-clk-soc-* 1 amlogic-clk-soc-s4.ko
-	amlogic-pinctrl-soc-* 1 amlogic-pinctrl-soc-s4.ko
+	amlogic-clk-soc-* 1 amlogic-clk-soc-s7d.ko
+	amlogic-pinctrl-soc-* 1 amlogic-pinctrl-soc-s7d.ko
 	amlogic-snd-codec-* 2 amlogic-snd-codec-dummy.ko amlogic-snd-codec-t9015.ko
 "
 
