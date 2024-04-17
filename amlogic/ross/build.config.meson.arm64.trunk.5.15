@@ -1,12 +1,11 @@
-KERNEL_DEVICETREE="t5d_t950d4_am301_1.5g t5d_t950x4_am311_1.5g t5d_t950x4_am311_1g t5d_t950d4_am301_1g"
-
+KERNEL_DEVICETREE="s7d_s905x5m_bm201 s7d_s905x5m_bm202 s7d_s905x5m_bm209"
 
 GLOBAL_VARIABLE_VALUE="
-	GPU_DRV_VERSION=r47p0
+	GPU_DRV_VERSION=r44p1 GPU_TYPE=vale
 "
 
 EXT_MODULES_ANDROID="
-	//driver_modules/gpu/bifrost:gpu
+	//driver_modules/gpu/valhall:gpu
 	//driver_modules/media_modules:media
 	//driver_modules/DTVKit/AFD:afd
 	//driver_modules/wifi_bt/wifi:wlan
@@ -15,16 +14,18 @@ EXT_MODULES_ANDROID="
 
 EXT_MODULES_ANDROID_AUTO_LOAD="
 "
+
 KCONFIG_EXT_ANDROID="
 "
 
 FIRMWARES_COPY_FROM_TO="
 	driver_modules/media_modules/firmware:video
 "
+
 TYPE_MODULE_SELECT_MODULE_ANDROID="
-	amlogic-clk-soc-* 1 amlogic-clk-soc-t5d.ko
-	amlogic-pinctrl-soc-* 1 amlogic-pinctrl-soc-t5d.ko
-	amlogic-snd-codec-* 3 amlogic-snd-codec-dummy.ko amlogic-snd-codec-tas5805.ko amlogic-snd-codec-tl1.ko
+	amlogic-clk-soc-* 1 amlogic-clk-soc-s7d.ko
+	amlogic-pinctrl-soc-* 1 amlogic-pinctrl-soc-s7d.ko
+	amlogic-snd-codec-* 2 amlogic-snd-codec-dummy.ko amlogic-snd-codec-t9015.ko
 "
 
 MODULES_OUT_REMOVE="
@@ -34,7 +35,7 @@ MODULES_OUT_ADD="
 "
 
 MODULES_LOAD_BLACK_LIST="
-        amlogic-dvb-demux.ko
+	amlogic_pcie_v2_host.ko
 "
 
 MODULES_SERVICE_LOAD_LIST="
@@ -47,3 +48,5 @@ MODULES_SEQUENCE_LIST=
 
 DEV_CONFIGS="
 "
+
+GKI_CONFIG=gki_10

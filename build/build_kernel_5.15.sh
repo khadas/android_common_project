@@ -85,9 +85,9 @@ if [[ -n ${LOAD_EXT_MODULES_IN_SECOND_STAGE} ]]; then
 	cat ${OUT_AMLOGIC_DIR}/ext_modules/ext_modules.order >> ${DEVICE_KERNEL_DIR}/vendor_dlkm.modules.load
 fi
 
+echo "copy image and gki modules"
 if [[ ${FULL_KERNEL_VERSION} == "common13-5.15" ]]; then
 	if [[ -n ${CONFIG_REPLACE_GKI_IMAGE} ]]; then
-		echo "copy gki image"
 		gki_dir=${KERNEL_REPO}/gki_image
 		cp ${gki_dir}/Image* ${DEVICE_KERNEL_DIR}
 		cp ${gki_dir}/vmlinux ${DEVICE_KERNEL_DIR}/symbols
@@ -97,7 +97,6 @@ if [[ ${FULL_KERNEL_VERSION} == "common13-5.15" ]]; then
 			cp ${gki_dir}/${gki_module} ${gki_module_dst}
 		done < ${KERNEL_REPO}/${KERNEL_DIR}/android/gki_system_dlkm_modules
 	else
-		echo "copy image"
 		if [ ${KERNEL_A32_SUPPORT} ]; then
 			cp ${DIST_DIR}/uImage ${DEVICE_KERNEL_DIR}/
 		else
@@ -168,6 +167,23 @@ else
 			fi
 		done
 	fi
+fi
+
+echo "create modules_load_list"
+touch ${DEVICE_KERNEL_DIR}/modules_load_list
+if [[ -s ${DEVICE_KERNEL_DIR}/system_dlkm.modules.load ]]; then
+	cat ${DEVICE_KERNEL_DIR}/vendor_dlkm.modules.load | while read module; do
+		if [[ `grep "/${module}" ${DIST_GKI_DIR}/system_dlkm.modules.load` ]]; then
+			gki_module=`grep "/${module}" ${DIST_GKI_DIR}/system_dlkm.modules.load`
+			echo "${gki_module}" >> ${DEVICE_KERNEL_DIR}/modules_load_list
+		else
+			echo "/vendor/lib/modules/${module}" >> ${DEVICE_KERNEL_DIR}/modules_load_list
+		fi
+	done
+else
+	cat ${DEVICE_KERNEL_DIR}/vendor_dlkm.modules.load | while read module; do
+		echo "/vendor/lib/modules/${module}" >> ${DEVICE_KERNEL_DIR}/modules_load_list
+	done
 fi
 
 echo "copy dtb"
