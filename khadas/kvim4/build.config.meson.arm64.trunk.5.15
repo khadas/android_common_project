@@ -2,9 +2,9 @@ if [[ -n ${BOARD_COMPILE_HDMITX_ONLY} && \
          `echo "${BOARD_COMPILE_HDMITX_ONLY}" \
          |awk '{print length($0)}'` -eq 4 ]];then
 echo "set kernel device tree to t7 hdmi only"
-KERNEL_DEVICETREE="t7c_a311d2_an400-hdmitx-only-4g"
+KERNEL_DEVICETREE="kvim4 kvim4n"
 else
-KERNEL_DEVICETREE="t7c_a311d2_an400_4g t7c_a311d2_an400_8g t7_a311d2_an400"
+KERNEL_DEVICETREE="kvim4 kvim4n"
 fi
 
 GLOBAL_VARIABLE_VALUE="

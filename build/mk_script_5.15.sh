@@ -288,6 +288,7 @@ function build() {
 	export PRODUCT_DIR=$1
 
 	device_project=`find project -name ${1}`
+	echo $device_project
 	if [[ -n ${device_project} ]]; then
 		device_project=`echo ${device_project} | cut -d '/' -f 2`
 	else
@@ -328,7 +329,7 @@ function usage() {
 
     2) ./mk ohm -v common14-5.15 -o out_dir	//compilation result directory
 						//out_dir: absolute directory or relative "common" directory
-						//default: device/amlogic/ohm-kernel/5.15 device/amlogic/ohm-kernel/32/5.15
+						//default: device/khadas/ohm-kernel/5.15 device/khadas/ohm-kernel/32/5.15
 
     3) ./mk ohm -v common14-5.15 -t user	//only for androidR+kernel5.15
 

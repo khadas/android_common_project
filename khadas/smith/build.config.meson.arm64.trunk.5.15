@@ -1,6 +1,6 @@
 KERNEL_DEVICETREE="t3_t965d4_ar321-2g t3_t965d4_ar331-4g"
 DTBO_DEVICETREE=android_overlay_dt
-PRODUCT_DIRNAME=device/amlogic/smith
+PRODUCT_DIRNAME=device/khadas/smith
 BOARD_DEVICENAME=smith
 
 GLOBAL_VARIABLE_VALUE="
